@@ -13,12 +13,9 @@ class Parameter(AbstractSourceDescriptor):
         self._path = path
 
     def _init_value(self):
-        client = boto3.client('ssm')
+        client = boto3.client("ssm")
         try:
-            response = client.get_parameter(
-                Name=self._path,
-                WithDecryption=True,
-            )
+            response = client.get_parameter(Name=self._path, WithDecryption=True)
             value = response["Parameter"]["Value"]
         except botocore.exceptions.ClientError as err:
             value = NOTHING

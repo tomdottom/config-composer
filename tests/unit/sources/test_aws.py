@@ -11,7 +11,6 @@ class MockClass(object):
 
 
 class TestParameterSource:
-
     def assert_descriptor_value(self, descriptor, expected_value):
         value = descriptor.__get__(None, MockClass)
         assert value == expected_value

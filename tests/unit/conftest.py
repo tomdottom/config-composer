@@ -19,13 +19,9 @@ def aws_parameter_fixtures(random_string):
     mock = mock_ssm()
     mock.start()
 
-    os.environ['AWS_DEFAULT_REGION'] = "us-east-1"
-    client = boto3.client('ssm')
-    client.put_parameter(
-        Name='/foo/bar/baz',
-        Value=random_string,
-        Type='String',
-    )
+    os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
+    client = boto3.client("ssm")
+    client.put_parameter(Name="/foo/bar/baz", Value=random_string, Type="String")
 
     yield random_string
 

@@ -7,10 +7,12 @@ class Sources:
 
     def __get__(self, obj, objtype):
         not_nothing = lambda val: val is not NOTHING
-        return next(filter(not_nothing, (
-            source.__get__(obj, objtype)
-            for source in self._sources
-        )), NOTHING)
+        return next(
+            filter(
+                not_nothing, (source.__get__(obj, objtype) for source in self._sources)
+            ),
+            NOTHING,
+        )
 
 
 class ModelMeta(type):
