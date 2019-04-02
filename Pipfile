@@ -4,11 +4,13 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+"boto3" = "*"
 
 [dev-packages]
 ipython = "*"
 pytest = "*"
 black = "*"
+moto = "*"
 
 [requires]
 python_version = "3.7"

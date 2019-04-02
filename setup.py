@@ -13,4 +13,7 @@ setup(
     setup_requires=[],
     install_requires=[],
     tests_require=[],
+    extras_require={
+        'AWS':  ["boto3"],
+    },
 )

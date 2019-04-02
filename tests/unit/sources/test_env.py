@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from config_composer import Env
+from config_composer.sources import Env
 
 
 class MockClass(object):
