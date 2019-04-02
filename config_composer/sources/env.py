@@ -2,6 +2,7 @@ from typing import Optional
 import os
 
 from ..abc import AbstractSourceDescriptor
+from ..consts import NOTHING
 
 
 class Env(AbstractSourceDescriptor):
@@ -12,4 +13,4 @@ class Env(AbstractSourceDescriptor):
             self._path = path.upper()
 
     def _init_value(self):
-        return os.environ.get(self._path)
+        return os.environ.get(self._path, NOTHING)

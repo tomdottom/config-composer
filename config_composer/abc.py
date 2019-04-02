@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
 
+from .consts import NOTHING
+
 
 class AbstractSourceDescriptor(ABC):
-    __value = None
+    __value = NOTHING
 
     @abstractmethod
     def _init_value(self):
@@ -12,6 +14,6 @@ class AbstractSourceDescriptor(ABC):
         pass
 
     def __get__(self, obj, objtype):
-        if self.__value is None:
+        if self.__value is NOTHING:
             self.__value = self._init_value()
         return self.__value
