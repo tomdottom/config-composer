@@ -1,8 +1,12 @@
+from textwrap import dedent
 from typing import Optional
 import os
 
-import boto3
-import botocore
+try:
+    import boto3
+    import botocore
+except ImportError:
+    _boto = False
 
 from ..abc import AbstractSourceDescriptor
 from ..consts import NOTHING
@@ -10,6 +14,12 @@ from ..consts import NOTHING
 
 class Parameter(AbstractSourceDescriptor):
     def __init__(self, path: str):
+        if not _boto:
+            raise ImportError(dedent("""
+                The AWS.Parameter source requires the boto3 library.
+                Please reinstall using:
+                    pip install config-composer[AWS]
+            """)
         self._path = path
 
     def _init_value(self):
