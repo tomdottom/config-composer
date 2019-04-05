@@ -1,2 +1,2 @@
 from .env import Env
-from . import AWS
+from . import aws
