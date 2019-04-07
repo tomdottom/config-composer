@@ -1,7 +1,7 @@
 import os
 
 from config_composer.sources.env import Env
-from config_composer.sources import aws
+from config_composer.sources import aws, vault
 from config_composer.core import Config, Sources
 
 
@@ -19,6 +19,14 @@ def test_aws_paramater(aws_parameter_fixtures, random_string):
 
     class MyConfig(Config):
         foo = aws.Parameter(path="/foo/bar/baz")
+
+    assert MyConfig.foo == random_string
+
+
+def test_vault_secret(vault_secret_fixtures, random_string):
+
+    class MyConfig(Config):
+        foo = vault.Secret(path="/foo/bar/baz", field="my-secret")
 
     assert MyConfig.foo == random_string
 
