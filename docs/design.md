@@ -9,6 +9,12 @@ Order of discovery for each Config:
 
 Imagined Usage:
 
+**runtime**
+
+    export MY_APP_CONFIG=test
+    python run app.py
+
+
 **app.py**
 
     from config import conf
@@ -20,8 +26,9 @@ Imagined Usage:
 **config.py**
 
     from typing import List
-    from config_composer import Config, Sources
-    from config_composer.sources import Env, Default
+    from config_composer import Config, Sources, Composer
+    from config_composer.sourcese.env import Env, Default
+    from config_composer.sources import aws
 
     class Base(Config):
         __sources__ = [
@@ -65,12 +72,28 @@ Imagined Usage:
         )
 
 
-    class Config(Selector):
-        __prefix__ = "NOZZLE_"
+    # class Conf(Composer):
+    #     __prefix__ = "MY_APP_"
+    #     dev = (Dev, Base)
+    #     test = (Test, Dev, Base)
+    #     prod = (Base, Prod)
+    #
+    # conf = Conf()
 
-        DEV = DEV
-        TEST = TEST
-        PROD= PROD
+    from marshmallow import Schema, fields
+    class ConfSchema(Schema):
+        foo = fields.Str(required=True)
+        bar = fields.Int(required=True)
+        xor = fields.Bool(required=True)
+        woop = fields.Str(required=True)
 
 
-    conf = Config()
+    conf = Composer(
+        prefix="MY_APP_",  # MY_APP_CONFIG
+        schema=ConfSchema(),
+        configs={
+            "dev": (Dev, Base),
+            "test": (Test, Dev, Base),
+            "prod": (Prod, Base),
+        }
+    )
