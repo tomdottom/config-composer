@@ -1,8 +1,8 @@
 from typing import Optional
 import os
 
-from ..abc import AbstractSourceDescriptor
 from ..consts import NOTHING
+from .abc import AbstractSourceDescriptor
 
 
 class Env(AbstractSourceDescriptor):

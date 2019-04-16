@@ -10,8 +10,8 @@ try:
 except ImportError:
     _boto = False
 
-from ..abc import AbstractSourceDescriptor
 from ..consts import NOTHING
+from .abc import AbstractSourceDescriptor
 
 
 class Parameter(AbstractSourceDescriptor):

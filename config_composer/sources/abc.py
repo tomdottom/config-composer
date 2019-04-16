@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from .consts import NOTHING
+from ..consts import NOTHING
 
 
 class AbstractSourceDescriptor(ABC):

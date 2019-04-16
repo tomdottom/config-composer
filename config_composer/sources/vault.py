@@ -9,8 +9,8 @@ try:
 except ImportError:
     _hvac = False
 
-from ..abc import AbstractSourceDescriptor
 from ..consts import NOTHING
+from .abc import AbstractSourceDescriptor
 
 
 class Secret(AbstractSourceDescriptor):
