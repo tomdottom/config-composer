@@ -2,7 +2,9 @@ from textwrap import dedent
 from tempfile import NamedTemporaryFile
 import os
 
-from config_composer.core import Spec, Config, String, Integer
+import pytest
+
+from config_composer.core import Spec, Config, String, Integer, ParameterError
 from config_composer.sources import aws, vault
 from config_composer.sources.default import Default
 from config_composer.sources.env import Env
@@ -141,6 +143,25 @@ def test_source_spec_from_multiple_ini_file(random_string, random_integer):
     # deploy_spec shadows default_spec
     assert config.foo == random_string
     assert config.bar == str(random_integer)
+
+
+# Test parameter access behaviour
+def test_accessing_non_existant_config_parameter(random_integer):
+    class ConfigSpec(Spec):
+        foo: str
+
+    class SourceSpec:
+        foo = Default(random_integer)
+
+    config = Config(config_spec=ConfigSpec, source_spec=SourceSpec)
+
+    with pytest.raises(ParameterError):
+        config["bar"]
+
+    with pytest.raises(ParameterError):
+        config.bar
+
+    assert config.get("bar") is None
 
 
 # Test parameter types and casting of values

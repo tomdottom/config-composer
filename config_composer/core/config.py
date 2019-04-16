@@ -15,6 +15,10 @@ SOURCES = dict(
 )
 
 
+class ParameterError(Exception):
+    pass
+
+
 def get_source_kwargs(source, data):
     arg_names = inspect.getfullargspec(source).args
     kwargs = dict(
@@ -86,12 +90,26 @@ class Config:
         return type("SourceSpec", bases, {})
 
     def __get__item__attr__(self, name):
-        spec = self.__config_spec.__parameters__[name]
-        source_value = getattr(self.__source_spec, name)
+        parameters = self.__config_spec.__parameters__
+        source_spec = self.__source_spec
+        if name not in parameters:
+            raise ParameterError(name)
+        if not hasattr(source_spec, name):
+            raise ParameterError(name)
+        spec = parameters[name]
+        source_value = getattr(source_spec, name)
         return spec.type(source_value)
 
     def __getattr__(self, name):
         return self.__get__item__attr__(name)
+        # raise ParameterError(name)
 
     def __getitem__(self, name):
         return self.__get__item__attr__(name)
+        # raise ParameterError(name)
+
+    def get(self, name):
+        try:
+            return self.__get__item__attr__(name)
+        except ParameterError:
+            return None
