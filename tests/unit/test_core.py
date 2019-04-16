@@ -1,9 +1,34 @@
+from textwrap import dedent
+from tempfile import NamedTemporaryFile
 import os
 
 from config_composer.sources.env import Env
 from config_composer.sources import aws, vault
 from config_composer.core import Spec, Config, String, Integer
 
+
+def test_source_spec_from_ini_file(random_string):
+    os.environ["VALUE"] = str(random_string)
+
+    tempfile = NamedTemporaryFile(suffix=".ini")
+    with open(tempfile.name, "w") as fh:
+        fh.write(dedent(
+        """
+        [parameter_foo]
+        source=Env
+        path=Value
+        """))
+    os.environ["SOURCE_SPEC_PATH"] = tempfile.name
+
+    class ConfigSpec(Spec):
+        foo: str
+
+    config = Config(
+        config_spec=ConfigSpec,
+        env_var="SOURCE_SPEC_PATH"
+    )
+
+    assert config.foo == random_string
 
 def test_casts_source_value_to_type(random_integer):
     os.environ["VALUE"] = str(random_integer)

@@ -1,8 +1,16 @@
 from collections import namedtuple
+from configparser import ConfigParser
+import os
 import sys
 
+from .abc import AbstractSourceDescriptor
 from .consts import NOTHING
 
+SOURCES = dict(
+    (source.__name__, source)
+    for source
+    in AbstractSourceDescriptor.__subclasses__()
+)
 
 ParameterSpec = namedtuple(
     "ParameterSpec",
@@ -80,15 +88,32 @@ class Spec(metaclass=MetaSpec):
     pass
 
 
-class Config:
-    def __init__(self, config_spec, source_spec=None):
-        self.__config_spec = config_spec
-        self.__source_spec = source_spec
-        # self.check_sources()
+def source_spec_from_ini(filepath):
+    class SourceSpec:
+        pass
 
-    # def check_sources(self):
-    #     self.__config_spec
-    #     sys.exit(1)
+    ini_config = ConfigParser()
+    ini_config.read(filepath)
+    parameters = dict(
+        (s.split("_", 1)[1], dict(ini_config[s]))
+        for s in ini_config.sections()
+        if s.startswith("parameter_")
+    )
+    for s, p in parameters.items():
+        klass = SOURCES[p["source"]]
+        setattr(SourceSpec, s, klass(path=p["path"]))
+
+    return SourceSpec
+
+
+class Config:
+    def __init__(self, config_spec, source_spec=None, env_var=None):
+        self.__config_spec = config_spec
+        if source_spec:
+            self.__source_spec = source_spec
+        if env_var:
+            source_spec_path = os.environ.get(env_var)
+            self.__source_spec = source_spec_from_ini(source_spec_path)
 
     def __get__item__attr__(self, name):
         spec = self.__config_spec.__parameters__[name]
