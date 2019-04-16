@@ -13,6 +13,7 @@ def random_string():
         random.choice(string.ascii_letters) for _ in range(random.randrange(20))
     )
 
+
 @pytest.fixture
 def random_integer():
     return random.randint(1, 99999)
@@ -52,7 +53,7 @@ def vault_secret_fixtures(requests_mock, random_string):
                     "description": "key/value secret storage",
                     "options": {"version": "2"},
                     "type": "kv",
-                },
+                }
             },
         },
     )
@@ -60,22 +61,10 @@ def vault_secret_fixtures(requests_mock, random_string):
     requests_mock.get(
         url=secret_uri,
         json={
-            "data": {
-                "data": {
-                    "my-secret": random_string,
-                },
-                "metadata": {
-                    "version": 1
-                }
-            },
-        }
+            "data": {"data": {"my-secret": random_string}, "metadata": {"version": 1}}
+        },
     )
 
-    requests_mock.get(
-        url=missing_secret_uri,
-        json={
-            "errors": []
-        }
-    )
+    requests_mock.get(url=missing_secret_uri, json={"errors": []})
 
     yield random_string

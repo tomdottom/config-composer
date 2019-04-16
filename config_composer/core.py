@@ -12,16 +12,11 @@ from .consts import NOTHING
 
 
 SOURCES = dict(
-    (source.__name__, source)
-    for source
-    in AbstractSourceDescriptor.__subclasses__()
+    (source.__name__, source) for source in AbstractSourceDescriptor.__subclasses__()
 )
 
 
-ParameterSpec = namedtuple(
-    "ParameterSpec",
-    ["name", "type"],
-)
+ParameterSpec = namedtuple("ParameterSpec", ["name", "type"])
 
 
 class Parameter:
@@ -42,7 +37,7 @@ def dunder_key(name):
 
 
 def get_factory_type(annotated_type):
-    if isinstance(annotated_type, (Parameter, )):
+    if isinstance(annotated_type, (Parameter,)):
         return annotated_type
     if callable(annotated_type):
         return annotated_type
@@ -52,10 +47,7 @@ def get_factory_type(annotated_type):
 class MetaSpec(type):
     def __new__(mcls, name, bases, attrs):
         annotations = attrs.get("__annotations__", {})
-        values = dict(
-            (k, v) for k, v in attrs.items()
-            if not dunder_key(k)
-        )
+        values = dict((k, v) for k, v in attrs.items() if not dunder_key(k))
         declared_parameters = mcls.get_declared_parameters(annotations, values)
 
         klass = super().__new__(mcls, name, bases, attrs)
@@ -70,23 +62,17 @@ class MetaSpec(type):
             ParameterSpec(name, get_factory_type(annotated_type))
             for name, annotated_type in annotations.items()
         ]
-        declared_parameters = set(
-            pspec.name for pspec in annotated_parameter_specs
-        )
+        declared_parameters = set(pspec.name for pspec in annotated_parameter_specs)
 
         # remaining un-annotated typing information from Parameter values
         value_parameter_specs = [
             ParameterSpec(name, get_factory_type(value))
             for name, value in values.items()
-            if (
-                not name in declared_parameters and
-                isinstance(value, (Parameter,))
-            )
+            if (not name in declared_parameters and isinstance(value, (Parameter,)))
         ]
         return dict(
             (spec.name, spec)
-            for spec
-            in annotated_parameter_specs + value_parameter_specs
+            for spec in annotated_parameter_specs + value_parameter_specs
         )
 
 
@@ -98,10 +84,7 @@ def get_source_kwargs(source, data):
     arg_names = inspect.getfullargspec(source).args
     kwargs = dict(
         (name, value)
-        for name, value in (
-            (name, data.get(name))
-            for name in arg_names
-        )
+        for name, value in ((name, data.get(name)) for name in arg_names)
         if value is not None
     )
     return kwargs

@@ -12,22 +12,22 @@ def test_source_spec_from_yaml_file(random_string):
 
     tempfile = NamedTemporaryFile(suffix=".yaml")
     with open(tempfile.name, "w") as fh:
-        fh.write(dedent(
-        """
+        fh.write(
+            dedent(
+                """
         parameters:
           foo:
             source: Env
             path: value
-        """))
+        """
+            )
+        )
     os.environ["SOURCE_SPEC_PATH"] = tempfile.name
 
     class ConfigSpec(Spec):
         foo: str
 
-    config = Config(
-        config_spec=ConfigSpec,
-        env_var="SOURCE_SPEC_PATH"
-    )
+    config = Config(config_spec=ConfigSpec, env_var="SOURCE_SPEC_PATH")
 
     assert config.foo == random_string
 
@@ -37,23 +37,24 @@ def test_source_spec_from_ini_file(random_string):
 
     tempfile = NamedTemporaryFile(suffix=".ini")
     with open(tempfile.name, "w") as fh:
-        fh.write(dedent(
-        """
+        fh.write(
+            dedent(
+                """
         [parameter_foo]
         source=Env
         path=Value
-        """))
+        """
+            )
+        )
     os.environ["SOURCE_SPEC_PATH"] = tempfile.name
 
     class ConfigSpec(Spec):
         foo: str
 
-    config = Config(
-        config_spec=ConfigSpec,
-        env_var="SOURCE_SPEC_PATH"
-    )
+    config = Config(config_spec=ConfigSpec, env_var="SOURCE_SPEC_PATH")
 
     assert config.foo == random_string
+
 
 def test_casts_source_value_to_type(random_integer):
     os.environ["VALUE"] = str(random_integer)
@@ -70,10 +71,7 @@ def test_casts_source_value_to_type(random_integer):
         xor = Env(path="value")
         baz = Env(path="value")
 
-    config = Config(
-        config_spec=ConfigSpec,
-        source_spec=SourceSpec,
-    )
+    config = Config(config_spec=ConfigSpec, source_spec=SourceSpec)
     assert type(config.foo) == str
     assert config.foo == str(random_integer)
     assert type(config.bar) == int
@@ -96,10 +94,7 @@ def test_string_parameter_type(random_string):
         foo = Env(path="foo")
         bar = Env(path="bar")
 
-    config = Config(
-        config_spec=ConfigSpec,
-        source_spec=SourceSpec,
-    )
+    config = Config(config_spec=ConfigSpec, source_spec=SourceSpec)
     assert config.foo == random_string
     assert config.bar == random_string
 
@@ -116,10 +111,7 @@ def test_integer_parameter_type(random_integer):
         foo = Env(path="foo")
         bar = Env(path="bar")
 
-    config = Config(
-        config_spec=ConfigSpec,
-        source_spec=SourceSpec,
-    )
+    config = Config(config_spec=ConfigSpec, source_spec=SourceSpec)
     assert config.foo == random_integer
     assert config.bar == random_integer
 
@@ -133,10 +125,7 @@ def test_env(random_string):
     class SourceSpec:
         foo = Env(path="bar")
 
-    config = Config(
-        config_spec=ConfigSpec,
-        source_spec=SourceSpec,
-    )
+    config = Config(config_spec=ConfigSpec, source_spec=SourceSpec)
 
     assert config["foo"] == random_string
     assert config.foo == random_string
@@ -149,10 +138,7 @@ def test_aws_paramater(aws_parameter_fixtures, random_string):
     class SourceSpec:
         foo = aws.Parameter(path="/foo/bar/baz")
 
-    config = Config(
-        config_spec=ConfigSpec,
-        source_spec=SourceSpec,
-    )
+    config = Config(config_spec=ConfigSpec, source_spec=SourceSpec)
 
     assert config.foo == random_string
 
@@ -164,9 +150,6 @@ def test_vault_secret(vault_secret_fixtures, random_string):
     class SourceSpec:
         foo = vault.Secret(path="/foo/bar/baz", field="my-secret")
 
-    config = Config(
-        config_spec=ConfigSpec,
-        source_spec=SourceSpec,
-    )
+    config = Config(config_spec=ConfigSpec, source_spec=SourceSpec)
 
     assert config.foo == random_string

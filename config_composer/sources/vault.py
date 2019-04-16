@@ -4,6 +4,7 @@ import os
 
 try:
     import hvac
+
     _hvac = True
 except ImportError:
     _hvac = False
@@ -13,13 +14,23 @@ from ..consts import NOTHING
 
 
 class Secret(AbstractSourceDescriptor):
-    def __init__(self, path: str, field: str, mount_point="secret", server="http://localhost:8200"):
+    def __init__(
+        self,
+        path: str,
+        field: str,
+        mount_point="secret",
+        server="http://localhost:8200",
+    ):
         if not _hvac:
-            raise ImportError(dedent("""
+            raise ImportError(
+                dedent(
+                    """
                 The vault.Secret source requires the hvac library.
                 Please reinstall using:
                     pip install config-composer[vault]
-            """))
+            """
+                )
+            )
         self._path = path
         self._mount_point = mount_point
         self._server = server
@@ -28,8 +39,7 @@ class Secret(AbstractSourceDescriptor):
     def _init_value(self):
         client = hvac.Client(url=self._server)
         secret_version = client.sys.retrieve_mount_option(
-            mount_point=self._mount_point,
-            option_name='version'
+            mount_point=self._mount_point, option_name="version"
         )
         client.secrets.kv.default_kv_version = secret_version
         if secret_version == "1":
