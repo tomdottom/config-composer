@@ -1,7 +1,11 @@
 from collections import namedtuple
 from configparser import ConfigParser
+from pathlib import Path
+import inspect
 import os
 import sys
+
+import yaml
 
 from .abc import AbstractSourceDescriptor
 from .consts import NOTHING
@@ -88,6 +92,19 @@ class Spec(metaclass=MetaSpec):
     pass
 
 
+def get_source_kwargs(source, data):
+    arg_names = inspect.getfullargspec(source).args
+    kwargs = dict(
+        (name, value)
+        for name, value in (
+            (name, data.get(name))
+            for name in arg_names
+        )
+        if value is not None
+    )
+    return kwargs
+
+
 def source_spec_from_ini(filepath):
     class SourceSpec:
         pass
@@ -101,9 +118,37 @@ def source_spec_from_ini(filepath):
     )
     for s, p in parameters.items():
         klass = SOURCES[p["source"]]
-        setattr(SourceSpec, s, klass(path=p["path"]))
+        kwargs = get_source_kwargs(klass, p)
+        setattr(SourceSpec, s, klass(**kwargs))
 
     return SourceSpec
+
+
+def source_spec_from_yaml(filepath):
+    class SourceSpec:
+        pass
+
+    with open(filepath) as fh:
+        yaml_config = yaml.safe_load(fh)
+    parameters = yaml_config["parameters"]
+    for s, p in parameters.items():
+        klass = SOURCES[p["source"]]
+        kwargs = get_source_kwargs(klass, p)
+        setattr(SourceSpec, s, klass(**kwargs))
+
+    return SourceSpec
+
+
+FILETYPE_FACTORIES = {
+    ".ini": source_spec_from_ini,
+    ".yaml": source_spec_from_yaml,
+    ".yml": source_spec_from_yaml,
+}
+
+
+def source_spec_from_file(filepath):
+    factory = FILETYPE_FACTORIES[Path(filepath).suffix]
+    return factory(filepath)
 
 
 class Config:
@@ -113,7 +158,7 @@ class Config:
             self.__source_spec = source_spec
         if env_var:
             source_spec_path = os.environ.get(env_var)
-            self.__source_spec = source_spec_from_ini(source_spec_path)
+            self.__source_spec = source_spec_from_file(source_spec_path)
 
     def __get__item__attr__(self, name):
         spec = self.__config_spec.__parameters__[name]

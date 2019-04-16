@@ -7,6 +7,31 @@ from config_composer.sources import aws, vault
 from config_composer.core import Spec, Config, String, Integer
 
 
+def test_source_spec_from_yaml_file(random_string):
+    os.environ["VALUE"] = str(random_string)
+
+    tempfile = NamedTemporaryFile(suffix=".yaml")
+    with open(tempfile.name, "w") as fh:
+        fh.write(dedent(
+        """
+        parameters:
+          foo:
+            source: Env
+            path: value
+        """))
+    os.environ["SOURCE_SPEC_PATH"] = tempfile.name
+
+    class ConfigSpec(Spec):
+        foo: str
+
+    config = Config(
+        config_spec=ConfigSpec,
+        env_var="SOURCE_SPEC_PATH"
+    )
+
+    assert config.foo == random_string
+
+
 def test_source_spec_from_ini_file(random_string):
     os.environ["VALUE"] = str(random_string)
 
