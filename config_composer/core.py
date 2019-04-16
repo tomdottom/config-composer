@@ -10,11 +10,13 @@ import yaml
 from .abc import AbstractSourceDescriptor
 from .consts import NOTHING
 
+
 SOURCES = dict(
     (source.__name__, source)
     for source
     in AbstractSourceDescriptor.__subclasses__()
 )
+
 
 ParameterSpec = namedtuple(
     "ParameterSpec",
@@ -105,10 +107,7 @@ def get_source_kwargs(source, data):
     return kwargs
 
 
-def source_spec_from_ini(filepath):
-    class SourceSpec:
-        pass
-
+def source_spec_parameters_from_ini(filepath):
     ini_config = ConfigParser()
     ini_config.read(filepath)
     parameters = dict(
@@ -116,39 +115,36 @@ def source_spec_from_ini(filepath):
         for s in ini_config.sections()
         if s.startswith("parameter_")
     )
-    for s, p in parameters.items():
-        klass = SOURCES[p["source"]]
-        kwargs = get_source_kwargs(klass, p)
-        setattr(SourceSpec, s, klass(**kwargs))
-
-    return SourceSpec
+    return parameters
 
 
-def source_spec_from_yaml(filepath):
-    class SourceSpec:
-        pass
-
+def source_spec_paramaters_from_yaml(filepath):
     with open(filepath) as fh:
         yaml_config = yaml.safe_load(fh)
     parameters = yaml_config["parameters"]
-    for s, p in parameters.items():
-        klass = SOURCES[p["source"]]
-        kwargs = get_source_kwargs(klass, p)
-        setattr(SourceSpec, s, klass(**kwargs))
-
-    return SourceSpec
+    return parameters
 
 
 FILETYPE_FACTORIES = {
-    ".ini": source_spec_from_ini,
-    ".yaml": source_spec_from_yaml,
-    ".yml": source_spec_from_yaml,
+    ".ini": source_spec_parameters_from_ini,
+    ".yaml": source_spec_paramaters_from_yaml,
+    ".yml": source_spec_paramaters_from_yaml,
 }
 
 
 def source_spec_from_file(filepath):
-    factory = FILETYPE_FACTORIES[Path(filepath).suffix]
-    return factory(filepath)
+    class SourceSpec:
+        pass
+
+    param_factory = FILETYPE_FACTORIES[Path(filepath).suffix]
+    parameters = param_factory(filepath)
+
+    for s, p in parameters.items():
+        klass = SOURCES[p["source"]]
+        kwargs = get_source_kwargs(klass, p)
+        setattr(SourceSpec, s, klass(**kwargs))
+
+    return SourceSpec
 
 
 class Config:
