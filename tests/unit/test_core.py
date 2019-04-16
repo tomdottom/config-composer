@@ -2,9 +2,10 @@ from textwrap import dedent
 from tempfile import NamedTemporaryFile
 import os
 
-from config_composer.sources.env import Env
-from config_composer.sources import aws, vault
 from config_composer.core import Spec, Config, String, Integer
+from config_composer.sources import aws, vault
+from config_composer.sources.default import Default
+from config_composer.sources.env import Env
 
 
 def test_source_spec_from_yaml_file(random_string):
@@ -114,6 +115,19 @@ def test_integer_parameter_type(random_integer):
     config = Config(config_spec=ConfigSpec, source_spec=SourceSpec)
     assert config.foo == random_integer
     assert config.bar == random_integer
+
+
+def test_default(random_string):
+    class ConfigSpec(Spec):
+        foo: str
+
+    class SourceSpec:
+        foo = Default(value=random_string)
+
+    config = Config(config_spec=ConfigSpec, source_spec=SourceSpec)
+
+    assert config["foo"] == random_string
+    assert config.foo == random_string
 
 
 def test_env(random_string):
