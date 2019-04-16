@@ -1,5 +1,7 @@
 from configparser import ConfigParser
 from pathlib import Path
+from typing import Iterable
+import inspect
 import inspect
 import os
 
@@ -67,10 +69,21 @@ class Config:
     def __init__(self, config_spec, source_spec=None, env_var=None):
         self.__config_spec = config_spec
         if source_spec:
-            self.__source_spec = source_spec
-        if env_var:
-            source_spec_path = os.environ.get(env_var)
-            self.__source_spec = source_spec_from_file(source_spec_path)
+            self.__source_spec = self.source_spec_factory(source_spec)
+        elif env_var:
+            source_spec_paths = os.environ.get(env_var).split(",")
+            source_specs = tuple(
+                source_spec_from_file(filepath) for filepath in source_spec_paths
+            )
+            self.__source_spec = self.source_spec_factory(source_specs)
+
+    def source_spec_factory(self, source_spec):
+        bases = tuple()
+        if inspect.isclass(source_spec):
+            bases += (source_spec,)
+        elif source_spec and isinstance(source_spec, (Iterable,)):
+            bases += tuple(source_spec)
+        return type("SourceSpec", bases, {})
 
     def __get__item__attr__(self, name):
         spec = self.__config_spec.__parameters__[name]

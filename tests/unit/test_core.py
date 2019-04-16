@@ -8,6 +8,7 @@ from config_composer.sources.default import Default
 from config_composer.sources.env import Env
 
 
+# Test loading source spec from files
 def test_source_spec_from_yaml_file(random_string):
     os.environ["VALUE"] = str(random_string)
 
@@ -57,6 +58,92 @@ def test_source_spec_from_ini_file(random_string):
     assert config.foo == random_string
 
 
+# Test composing multiple source specs
+def test_multiple_source_specs(random_string, random_integer):
+    os.environ["VALUE"] = random_string
+
+    class ConfigSpec(Spec):
+        foo: str
+        bar: int
+
+    class SourceSpec1:
+        foo = Env(path="value")
+
+    class SourceSpec2:
+        bar = Default(value=str(random_integer))
+
+    config = Config(config_spec=ConfigSpec, source_spec=(SourceSpec1, SourceSpec2))
+
+    assert config.foo == random_string
+    assert config.bar == random_integer
+
+
+def test_multiple_source_specs_most_significant_spec(random_string, random_integer):
+    os.environ["VALUE"] = random_string
+
+    class ConfigSpec(Spec):
+        foo: str
+        bar: str
+
+    class SourceSpec1:
+        foo = Env(path="value")
+        bar = Default(random_integer)
+
+    class SourceSpec2:
+        bar = Default(value=str(random_integer))
+
+    config = Config(config_spec=ConfigSpec, source_spec=(SourceSpec1, SourceSpec2))
+
+    # SourceSpec1 shadows SourceSpec2
+    assert config.foo == random_string
+    assert config.bar == str(random_integer)
+
+
+def test_source_spec_from_multiple_ini_file(random_string, random_integer):
+    os.environ["VALUE"] = str(random_string)
+
+    deploy_spec = NamedTemporaryFile(suffix=".ini")
+    default_spec = NamedTemporaryFile(suffix=".ini")
+    with open(deploy_spec.name, "w") as fh:
+        fh.write(
+            dedent(
+                f"""
+        [parameter_foo]
+        source=Env
+        path=Value
+        """
+            )
+        )
+    with open(default_spec.name, "w") as fh:
+        fh.write(
+            dedent(
+                f"""
+        [parameter_foo]
+        source=Default
+        value=Should not be read!
+
+        [parameter_bar]
+        source=Default
+        value={random_integer}
+        """
+            )
+        )
+
+    # deploy_spec shadows default_spec
+    os.environ["SOURCE_SPEC_PATH"] = ",".join((deploy_spec.name, default_spec.name))
+
+    class ConfigSpec(Spec):
+        foo: str
+        bar: str
+
+    config = Config(config_spec=ConfigSpec, env_var="SOURCE_SPEC_PATH")
+
+    # deploy_spec shadows default_spec
+    assert config.foo == random_string
+    assert config.bar == str(random_integer)
+
+
+# Test parameter types and casting of values
 def test_casts_source_value_to_type(random_integer):
     os.environ["VALUE"] = str(random_integer)
 
@@ -117,6 +204,7 @@ def test_integer_parameter_type(random_integer):
     assert config.bar == random_integer
 
 
+# Test parameter sources
 def test_default(random_string):
     class ConfigSpec(Spec):
         foo: str
