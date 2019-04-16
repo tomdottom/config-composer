@@ -2,67 +2,121 @@ import os
 
 from config_composer.sources.env import Env
 from config_composer.sources import aws, vault
-from config_composer.core import Config, Sources
+from config_composer.core import Spec, Config, String, Integer
+
+
+def test_casts_source_value_to_type(random_integer):
+    os.environ["VALUE"] = str(random_integer)
+
+    class ConfigSpec(Spec):
+        foo: str
+        bar: int
+        xor = String()
+        baz = Integer()
+
+    class SourceSpec:
+        foo = Env(path="value")
+        bar = Env(path="value")
+        xor = Env(path="value")
+        baz = Env(path="value")
+
+    config = Config(
+        config_spec=ConfigSpec,
+        source_spec=SourceSpec,
+    )
+    assert type(config.foo) == str
+    assert config.foo == str(random_integer)
+    assert type(config.bar) == int
+    assert config.bar == random_integer
+    assert type(config.xor) == str
+    assert config.foo == str(random_integer)
+    assert type(config.baz) == int
+    assert config.bar == random_integer
+
+
+def test_string_parameter_type(random_string):
+    os.environ["FOO"] = random_string
+    os.environ["BAR"] = random_string
+
+    class ConfigSpec(Spec):
+        foo: str
+        bar = String()
+
+    class SourceSpec:
+        foo = Env(path="foo")
+        bar = Env(path="bar")
+
+    config = Config(
+        config_spec=ConfigSpec,
+        source_spec=SourceSpec,
+    )
+    assert config.foo == random_string
+    assert config.bar == random_string
+
+
+def test_integer_parameter_type(random_integer):
+    os.environ["FOO"] = str(random_integer)
+    os.environ["BAR"] = str(random_integer)
+
+    class ConfigSpec(Spec):
+        foo: int
+        bar = Integer()
+
+    class SourceSpec:
+        foo = Env(path="foo")
+        bar = Env(path="bar")
+
+    config = Config(
+        config_spec=ConfigSpec,
+        source_spec=SourceSpec,
+    )
+    assert config.foo == random_integer
+    assert config.bar == random_integer
 
 
 def test_env(random_string):
     os.environ["BAR"] = random_string
 
-    class MyConfig(Config):
+    class ConfigSpec(Spec):
+        foo: str
+
+    class SourceSpec:
         foo = Env(path="bar")
 
-    assert MyConfig.foo == random_string
+    config = Config(
+        config_spec=ConfigSpec,
+        source_spec=SourceSpec,
+    )
+
+    assert config["foo"] == random_string
+    assert config.foo == random_string
 
 
 def test_aws_paramater(aws_parameter_fixtures, random_string):
-    os.environ["BAR"] = random_string
+    class ConfigSpec(Spec):
+        foo: str
 
-    class MyConfig(Config):
+    class SourceSpec:
         foo = aws.Parameter(path="/foo/bar/baz")
 
-    assert MyConfig.foo == random_string
+    config = Config(
+        config_spec=ConfigSpec,
+        source_spec=SourceSpec,
+    )
+
+    assert config.foo == random_string
 
 
 def test_vault_secret(vault_secret_fixtures, random_string):
+    class ConfigSpec(Spec):
+        foo: str
 
-    class MyConfig(Config):
+    class SourceSpec:
         foo = vault.Secret(path="/foo/bar/baz", field="my-secret")
 
-    assert MyConfig.foo == random_string
+    config = Config(
+        config_spec=ConfigSpec,
+        source_spec=SourceSpec,
+    )
 
-
-def test_selectes_first_good_source(aws_parameter_fixtures, random_string):
-    os.environ["FOO_BAR_BAZ"] = "This is the string you are looking for"
-
-    class MyConfig(Config):
-        foo = Sources(Env(path="FOO_BAR_BAZ"), aws.Parameter(path="/foo/bar/baz"))
-
-    assert MyConfig.foo == os.environ["FOO_BAR_BAZ"]
-
-
-def test_fall_through_source_options(aws_parameter_fixtures):
-    del os.environ["FOO_BAR_BAZ"]
-    random_string = aws_parameter_fixtures
-
-    class MyConfig(Config):
-        foo = Sources(Env(path="FOO_BAR_BAZ"), aws.Parameter(path="/foo/bar/baz"))
-
-    assert MyConfig.foo == random_string
-
-
-def test_inheritance(aws_parameter_fixtures):
-    os.environ["FOO_BAR_BAZ"] = "WAT"
-    random_string = aws_parameter_fixtures
-
-    class MyConfigDev(Config):
-        foo = Sources(Env(path="FOO_BAR_BAZ"))
-        bar = Sources(Env(path="FOO_BAR_BAZ"))
-
-    class MyConfig(MyConfigDev):
-        foo = Sources(aws.Parameter(path="/foo/bar/baz"))
-
-    assert MyConfigDev.foo == "WAT"
-    assert MyConfigDev.bar == "WAT"
-
-    assert MyConfig.foo == random_string
-    assert MyConfig.bar == "WAT"
+    assert config.foo == random_string

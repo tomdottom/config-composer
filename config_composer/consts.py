@@ -1,1 +1,4 @@
-NOTHING = object()
+class NOTHING:
+    pass
+
+NOTHING = NOTHING()

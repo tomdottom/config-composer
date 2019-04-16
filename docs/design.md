@@ -1,99 +1,88 @@
 # Design
 
-Order of discovery for each Config:
+Configuration object is created using two files:
 
-1. Field Sources
-2. Config Sources
-3. Parent Config
+The first containing the config specification file:
+- part of the app
+- defines the config value types
+- validates the config values
+- a python file
 
+The second containing the config source files:
+- created/selected at deployment
+  - deployments to different systems can specify sources as needed
+- can be composed of multiple files
+- supports many types to files
 
-Imagined Usage:
+## Example
 
-**runtime**
+An application `config.py` defines the config values, types,
+and validation requirements in the `ConfigSpec`.
 
-    export MY_APP_CONFIG=test
-    python run app.py
-
-
-**app.py**
-
-    from config import conf
-
-    foo = conf["foo"]
-    bar = conf.bar
-
-
-**config.py**
-
-    from typing import List
-    from config_composer import Config, Sources, Composer
-    from config_composer.sourcese.env import Env, Default
-    from config_composer.sources import aws
-
-    class Base(Config):
-        __sources__ = [
-            Env(prefix="NOZZLE_"),  # Check first
-            Env(),                  # Checked second
-        ]
+The `ConfigSource` object creates an instance which lets the
+application access config values from a variety of sources.
 
 
-    # export NOZZLE_FOO="Foo"
-    # export NOZZLE_BAR="foo,bar,baz"
-    # export BAR="Ignore Me"
-    # export XOR="foo,bar,baz"
-    class Dev(Config):
+**app/config.py**
+
+    class ConfigSpec:
         foo: str
-        bar: List[str]
-        xor: str
-        woop: str = "Default"
-
-
-    # export NOZZLE_FOO="Foo"
-    # export NOZZLE_BAR="foo,bar,baz"
-    class Test(Config):
-        __sources__ = [
-            Env(prefix="TEST_NOZZLE_"),  # Check second
-            Env(prefix="NOZZLE_"),       # Check third
-            Env(),                       # Check fourth
-        ]
-        foo: str = Sources(
-            AWS(),                       # Check first
+        bar = params.String(
+            validator=Length(min=10, max=20)
         )
-        bar: List[str] = (
-            AWS(),                       # Check first
-            "Default",                   # Check next, always succeeds, blocks other sources
-        )
-        xor: str
-        woop: str = Default(
-            Source(
-                AWS(),                   # Check first
-            ),
-            "Default",                   # Check last in Test, blocks parent config sources
-        )
+        baz: bool
 
-
-    # class Conf(Composer):
-    #     __prefix__ = "MY_APP_"
-    #     dev = (Dev, Base)
-    #     test = (Test, Dev, Base)
-    #     prod = (Base, Prod)
-    #
-    # conf = Conf()
-
-    from marshmallow import Schema, fields
-    class ConfSchema(Schema):
-        foo = fields.Str(required=True)
-        bar = fields.Int(required=True)
-        xor = fields.Bool(required=True)
-        woop = fields.Str(required=True)
-
-
-    conf = Composer(
-        prefix="MY_APP_",  # MY_APP_CONFIG
-        schema=ConfSchema(),
-        configs={
-            "dev": (Dev, Base),
-            "test": (Test, Dev, Base),
-            "prod": (Prod, Base),
-        }
+    config = ConfigSource(
+        schema=ConfigSchema
     )
+
+Sources can be defined in a variety of files to make it easier
+and flexible for DevOps. For example `.py`, `.yaml`, `*.ini`.
+
+**source_spec.py**
+
+    class AppEnv(sources.Env):
+        prefix = "MY_APP_"
+
+
+    class SourceSpec:
+        foo = sources.Env(path="FOO")                 # FOO
+        bar = AppEnv(path="BAR")                      # MY_APP_BAR
+        baz = sources.Env(path="BAZ", prefix="APP_")  # APP_BAZ
+
+**source_spec.yaml**
+
+    sources:
+        AppEnv:
+            source: Env
+            prefix: MY_APP_
+
+    parameters:
+        foo:
+            (): Env
+            path: FOO
+        bar:
+            (): AppEnv
+            path: FOO
+        baz:
+            (): Env
+            path: FOO
+            prefix: APP_
+
+**source_spec.ini**
+
+    [source_AppEnv]
+    source=Env
+    prefix = "MY_APP_"
+
+    [value_foo]
+    source=Env
+    args=("FOO",)
+
+    [value_bar]
+    source=AppEnv
+    args=("BAR",)
+
+    [value_baz]
+    source=Env
+    args=("BAZ", "APP_")

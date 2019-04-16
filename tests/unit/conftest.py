@@ -13,6 +13,10 @@ def random_string():
         random.choice(string.ascii_letters) for _ in range(random.randrange(20))
     )
 
+@pytest.fixture
+def random_integer():
+    return random.randint(1, 99999)
+
 
 @pytest.fixture
 def aws_parameter_fixtures(random_string):
