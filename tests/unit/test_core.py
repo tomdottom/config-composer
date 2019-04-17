@@ -22,7 +22,7 @@ def test_source_spec_from_yaml_file(random_string):
         parameters:
           foo:
             source: Env
-            path: value
+            path: VALUE
         """
             )
         )
@@ -46,7 +46,7 @@ def test_source_spec_from_ini_file(random_string):
                 """
         [parameter_foo]
         source=Env
-        path=Value
+        path=VALUE
         """
             )
         )
@@ -69,7 +69,7 @@ def test_multiple_source_specs(random_string, random_integer):
         bar: int
 
     class SourceSpec1:
-        foo = Env(path="value")
+        foo = Env(path="VALUE")
 
     class SourceSpec2:
         bar = Default(value=str(random_integer))
@@ -88,7 +88,7 @@ def test_multiple_source_specs_most_significant_spec(random_string, random_integ
         bar: str
 
     class SourceSpec1:
-        foo = Env(path="value")
+        foo = Env(path="VALUE")
         bar = Default(random_integer)
 
     class SourceSpec2:
@@ -112,7 +112,7 @@ def test_source_spec_from_multiple_ini_file(random_string, random_integer):
                 f"""
         [parameter_foo]
         source=Env
-        path=Value
+        path=VALUE
         """
             )
         )
@@ -175,10 +175,10 @@ def test_casts_source_value_to_type(random_integer):
         baz = Integer()
 
     class SourceSpec:
-        foo = Env(path="value")
-        bar = Env(path="value")
-        xor = Env(path="value")
-        baz = Env(path="value")
+        foo = Env(path="VALUE")
+        bar = Env(path="VALUE")
+        xor = Env(path="VALUE")
+        baz = Env(path="VALUE")
 
     config = Config(config_spec=ConfigSpec, source_spec=SourceSpec)
     assert type(config.foo) == str
@@ -200,8 +200,8 @@ def test_string_parameter_type(random_string):
         bar = String()
 
     class SourceSpec:
-        foo = Env(path="foo")
-        bar = Env(path="bar")
+        foo = Env(path="FOO")
+        bar = Env(path="BAR")
 
     config = Config(config_spec=ConfigSpec, source_spec=SourceSpec)
     assert config.foo == random_string
@@ -217,8 +217,8 @@ def test_integer_parameter_type(random_integer):
         bar = Integer()
 
     class SourceSpec:
-        foo = Env(path="foo")
-        bar = Env(path="bar")
+        foo = Env(path="FOO")
+        bar = Env(path="BAR")
 
     config = Config(config_spec=ConfigSpec, source_spec=SourceSpec)
     assert config.foo == random_integer
@@ -246,7 +246,7 @@ def test_env(random_string):
         foo: str
 
     class SourceSpec:
-        foo = Env(path="bar")
+        foo = Env(path="BAR")
 
     config = Config(config_spec=ConfigSpec, source_spec=SourceSpec)
 

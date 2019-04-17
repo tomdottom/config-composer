@@ -22,16 +22,9 @@ class TestEnvSource:
 
         self.assert_descriptor_value(field, random_string)
 
-    def test_converts_to_uppercases(self, random_string):
-        os.environ["FOO"] = random_string
-
-        field = Env(path="foo")
-
-        self.assert_descriptor_value(field, random_string)
-
     def test_adds_prefix(self, random_string):
         os.environ["TEST_FOO"] = random_string
 
-        field = Env(path="foo", prefix="TEST_")
+        field = Env(path="FOO", prefix="TEST_")
 
         self.assert_descriptor_value(field, random_string)
