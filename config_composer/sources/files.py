@@ -27,6 +27,15 @@ class DotEnvFile(AbstractSourceDescriptor):
         self._dotenv_path = dotenv_path
         self._path = path
 
+    @property
+    def _name(self):
+        return self._path
+
+    @property
+    def _key(self):
+        source_name = type(self).__name__
+        return source_name, self._dotenv_path
+
     def _init_value(self):
         parsed = dotenv_values(stream=self._dotenv_path)
         return parsed[self._path]

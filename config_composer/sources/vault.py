@@ -36,6 +36,15 @@ class Secret(AbstractSourceDescriptor):
         self._server = server
         self._field = field
 
+    @property
+    def _name(self):
+        return self._field
+
+    @property
+    def _key(self):
+        name = type(self).__name__
+        return name, self._mount_point, self._path
+
     def _init_value(self):
         client = hvac.Client(url=self._server)
         secret_version = client.sys.retrieve_mount_option(
