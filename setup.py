@@ -13,5 +13,5 @@ setup(
     setup_requires=[],
     install_requires=[],
     tests_require=[],
-    extras_require={"AWS": ["boto3"], "Vault": ["hvac"]},
+    extras_require={"AWS": ["boto3"], "Vault": ["hvac"], "dotenv": ["python-dotenv"]},
 )

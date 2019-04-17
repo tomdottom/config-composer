@@ -5,7 +5,7 @@ import os
 import pytest
 
 from config_composer.core import Spec, Config, String, Integer, ParameterError
-from config_composer.sources import aws, vault
+from config_composer.sources import aws, vault, files
 from config_composer.sources.default import Default
 from config_composer.sources.env import Env
 
@@ -276,3 +276,30 @@ def test_vault_secret(vault_secret_fixtures, random_string):
     config = Config(config_spec=ConfigSpec, source_spec=SourceSpec)
 
     assert config.foo == random_string
+
+
+def test_dotfile(random_string, random_integer):
+    tempfile = NamedTemporaryFile(prefix=".env")
+    with open(tempfile.name, "w") as fh:
+        fh.write(
+            dedent(
+                f"""
+        # a comment and that will be ignored.
+        FOO={random_string}
+        BAR={random_integer}
+        """
+            )
+        )
+
+    class ConfigSpec(Spec):
+        foo: str
+        bar: int
+
+    class SourceSpec:
+        foo = files.DotEnvFile(path="FOO", dotenv_path=tempfile.name)
+        bar = files.DotEnvFile(path="BAR", dotenv_path=tempfile.name)
+
+    config = Config(config_spec=ConfigSpec, source_spec=SourceSpec)
+
+    assert config.foo == random_string
+    assert config.bar == random_integer
