@@ -7,11 +7,11 @@
 - Env
 - AWS Parameter
 - Vault Secret
+- Env Files
+- Default
 
 ## Candidates
 
 - Consul KV
 - Redis
-- Env Files
 - Windows Registry
-
