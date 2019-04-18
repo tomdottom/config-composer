@@ -10,10 +10,10 @@ except ImportError:
     _hvac = False
 
 from ..consts import NOTHING
-from .abc import AbstractSourceDescriptor
+from .abc import AbstractSourceDescriptor, ValueSource
 
 
-class Secret(AbstractSourceDescriptor):
+class Secret(ValueSource, AbstractSourceDescriptor):
     def __init__(
         self,
         path: str,
@@ -45,7 +45,8 @@ class Secret(AbstractSourceDescriptor):
         name = type(self).__name__
         return name, self._mount_point, self._path
 
-    def _init_value(self):
+    @property
+    def _value(self):
         client = hvac.Client(url=self._server)
         secret_version = client.sys.retrieve_mount_option(
             mount_point=self._mount_point, option_name="version"

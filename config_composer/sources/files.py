@@ -9,10 +9,10 @@ except ImportError:
     _python_dotfile = True
 
 from ..consts import NOTHING
-from .abc import AbstractSourceDescriptor
+from .abc import AbstractSourceDescriptor, DocumentSource
 
 
-class DotEnvFile(AbstractSourceDescriptor):
+class DotEnvFile(DocumentSource, AbstractSourceDescriptor):
     def __init__(self, path: str, dotenv_path=".env"):
         if not _python_dotfile:
             raise ImportError(
@@ -36,6 +36,7 @@ class DotEnvFile(AbstractSourceDescriptor):
         source_name = type(self).__name__
         return source_name, self._dotenv_path
 
-    def _init_value(self):
+    @property
+    def _doc(self):
         parsed = dotenv_values(stream=self._dotenv_path)
-        return parsed[self._path]
+        return parsed

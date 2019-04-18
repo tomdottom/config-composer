@@ -11,10 +11,10 @@ except ImportError:
     _boto = False
 
 from ..consts import NOTHING
-from .abc import AbstractSourceDescriptor
+from .abc import AbstractSourceDescriptor, ValueSource
 
 
-class Parameter(AbstractSourceDescriptor):
+class Parameter(ValueSource, AbstractSourceDescriptor):
     def __init__(self, path: str):
         if not _boto:
             raise ImportError(
@@ -37,7 +37,8 @@ class Parameter(AbstractSourceDescriptor):
         name = type(self).__name__
         return (name,)
 
-    def _init_value(self):
+    @property
+    def _value(self):
         client = boto3.client("ssm")
         try:
             response = client.get_parameter(Name=self._path, WithDecryption=True)

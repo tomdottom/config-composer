@@ -2,12 +2,12 @@ from typing import Optional, Any
 import os
 
 from ..consts import NOTHING
-from .abc import AbstractSourceDescriptor
+from .abc import AbstractSourceDescriptor, ValueSource
 
 
-class Default(AbstractSourceDescriptor):
+class Default(ValueSource, AbstractSourceDescriptor):
     def __init__(self, value: Any):
-        self._value = value
+        self._default_value = value
 
     @property
     def _name(self):
@@ -18,5 +18,6 @@ class Default(AbstractSourceDescriptor):
         name = type(self).__name__
         return (name,)
 
-    def _init_value(self):
-        return self._value
+    @property
+    def _value(self):
+        return self._default_value

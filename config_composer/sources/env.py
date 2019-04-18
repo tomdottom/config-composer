@@ -2,10 +2,10 @@ from typing import Optional
 import os
 
 from ..consts import NOTHING
-from .abc import AbstractSourceDescriptor
+from .abc import AbstractSourceDescriptor, ValueSource
 
 
-class Env(AbstractSourceDescriptor):
+class Env(ValueSource, AbstractSourceDescriptor):
     def __init__(self, path: str, prefix: Optional[str] = None):
         if prefix is not None:
             self._path = prefix + path
@@ -21,5 +21,6 @@ class Env(AbstractSourceDescriptor):
         name = type(self).__name__
         return (name,)
 
-    def _init_value(self):
+    @property
+    def _value(self):
         return os.environ.get(self._path, NOTHING)
