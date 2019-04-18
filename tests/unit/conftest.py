@@ -10,7 +10,7 @@ import pytest
 @pytest.fixture
 def random_string():
     return "".join(
-        random.choice(string.ascii_letters) for _ in range(random.randrange(20))
+        random.choice(string.ascii_letters) for _ in range(random.randrange(10, 20))
     )
 
 
