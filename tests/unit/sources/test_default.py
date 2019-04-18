@@ -5,13 +5,11 @@ import pytest
 from config_composer.sources import Default
 
 
-class MockClass(object):
-    # add any methods to assert access here
-    pass
-
-
 class TestDefaultSource:
     def assert_descriptor_value(self, descriptor, expected_value):
+        class MockClass(object):
+            pass
+
         value = descriptor.__get__(None, MockClass)
         assert value == expected_value
 

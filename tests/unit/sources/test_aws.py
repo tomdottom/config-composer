@@ -6,12 +6,11 @@ from config_composer.sources import aws
 from config_composer.consts import NOTHING
 
 
-class MockClass(object):
-    pass
-
-
 class TestParameterSource:
     def assert_descriptor_value(self, descriptor, expected_value):
+        class MockClass(object):
+            pass
+
         value = descriptor.__get__(None, MockClass)
         assert value == expected_value
 
