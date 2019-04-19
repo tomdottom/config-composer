@@ -50,9 +50,19 @@ class DocumentSource(ABC):
 
     def __get__(self, obj, objtype):
         cache = self._get_cache(obj, objtype)
+
+        if isinstance(self, DocumentSourceTTL):
+            ttl = self._get_ttl(obj, objtype)
+            ttl_data = ttl.get(self._key)
+            expired, ttl_data = self._expired(ttl_data)
+            if expired:
+                ttl[self._key] = ttl_data
+                cache.update(self._doc)
+
         if cache.get(self._name, NOTHING) is NOTHING:
-            cache.clear()
+            # cache.clear()
             cache.update(self._doc)
+
         return cache[self._name]
 
     def _get_cache(self, obj, objtype):
@@ -64,3 +74,19 @@ class DocumentSource(ABC):
         if not cache_key in root_cache:
             root_cache[cache_key] = {}
         return root_cache[cache_key]
+
+
+class DocumentSourceTTL(ABC):
+    @abstractmethod
+    def _expired(self):
+        raise NotImplementedError
+
+    def _get_ttl(self, obj, objtype):
+        ttl_host = obj or objtype
+        if not hasattr(ttl_host, "__source_ttl__"):
+            setattr(ttl_host, "__source_ttl__", {})
+        root_ttl = getattr(ttl_host, "__source_ttl__")
+        ttl_key = self._key
+        if not ttl_key in root_ttl:
+            root_ttl[ttl_key] = {}
+        return root_ttl[ttl_key]

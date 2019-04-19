@@ -94,7 +94,9 @@ class Config:
         source_spec = self.__source_spec
         if name not in parameters:
             raise ParameterError(name)
-        if not hasattr(source_spec, name):
+        # if not hasattr(source_spec, name):
+        # Cannot use hasattr as it will invoke descriptors :facepalm:/
+        if name not in dir(source_spec):
             raise ParameterError(name)
         spec = parameters[name]
         source_value = getattr(source_spec, name)
