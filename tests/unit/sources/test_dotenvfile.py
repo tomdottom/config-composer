@@ -60,10 +60,10 @@ class TestDotEnvFileSource:
             )
 
         foo_field = DotEnvFile(
-            path="FOO", dotenv_path=tempfile.name, get_time=mock_time
+            path="FOO", dotenv_path=tempfile.name, _get_time=mock_time
         )
         bar_field = DotEnvFile(
-            path="bar", dotenv_path=tempfile.name, get_time=mock_time
+            path="bar", dotenv_path=tempfile.name, _get_time=mock_time
         )
 
         self.assert_descriptor_value(foo_field, random_string, MockClass)
@@ -85,10 +85,10 @@ class TestDotEnvFileSource:
 
         # ttl has not expired and hence cache is used
         foo_field = DotEnvFile(
-            path="FOO", dotenv_path=tempfile.name, get_time=mock_time
+            path="FOO", dotenv_path=tempfile.name, _get_time=mock_time
         )
         bar_field = DotEnvFile(
-            path="bar", dotenv_path=tempfile.name, get_time=mock_time
+            path="bar", dotenv_path=tempfile.name, _get_time=mock_time
         )
 
         # time passes ttl

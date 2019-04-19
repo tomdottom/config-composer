@@ -22,7 +22,7 @@ class DotEnvFile(DocumentSource, DocumentSourceTTL, AbstractSourceDescriptor):
         path: str,
         dotenv_path=".env",
         ttl=FIFTEEN_SECONDS,
-        get_time=time.monotonic,
+        _get_time=time.monotonic,
     ):
         if not _python_dotfile:
             raise ImportError(
@@ -37,7 +37,7 @@ class DotEnvFile(DocumentSource, DocumentSourceTTL, AbstractSourceDescriptor):
         self._dotenv_path = dotenv_path
         self._path = path
         self._ttl = ttl
-        self._get_time = get_time
+        self._get_time = _get_time
 
     @property
     def _name(self):
