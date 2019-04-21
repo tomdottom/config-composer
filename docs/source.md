@@ -15,3 +15,10 @@
 - Consul KV
 - Redis
 - Windows Registry
+- TOML Files
+- JSON Files
+- Yaml Files
+- Remote files
+ - http
+ - ssh
+- ETCD

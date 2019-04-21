@@ -1,8 +1,9 @@
 from configparser import ConfigParser
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Callable, Dict, Union, Type
 import inspect
 import inspect
+import logging
 import os
 
 import yaml
@@ -15,11 +16,18 @@ SOURCES = dict(
 )
 
 
+logger = logging.getLogger(__name__)
+
+
 class ParameterError(Exception):
     pass
 
 
-def get_source_kwargs(source, data):
+def get_source_kwargs(source: Callable, data: Dict):
+    """
+    Filters a data dictionary and returns only key/values
+    which match argument names of the source callable.
+    """
     arg_names = inspect.getfullargspec(source).args
     kwargs = dict(
         (name, value)
@@ -58,7 +66,13 @@ def source_spec_from_file(filepath):
     class SourceSpec:
         pass
 
-    param_factory = FILETYPE_FACTORIES[Path(filepath).suffix]
+    file_suffix = Path(filepath).suffix
+    param_factory = FILETYPE_FACTORIES[file_suffix]
+    logger.info(
+        f"Creating SourceSpec from '{filepath}'' using '{file_suffix}' factory."
+    )
+    # TODO: handle unsupported filetypes
+    # TODO: handle missing files
     parameters = param_factory(filepath)
 
     for s, p in parameters.items():
@@ -70,6 +84,19 @@ def source_spec_from_file(filepath):
 
 
 class Config:
+    """Binds a ConfigSpec and SourceSpec into a config object.
+
+    The config object:
+    - only fetches configured parameters defined in ConfigSpec
+    - fetches parameter values from sources defined in one of the SourceSpecs
+    - converts values into expected type defined in ConfigSpec
+
+    Args:
+        config_spec (Spec): ?
+        source_spec (Union[Type, Iterable[Type]]): ?
+        env_var: ?
+    """
+
     def __init__(self, config_spec, source_spec=None, env_var=None):
         self.__config_spec = config_spec
         if source_spec:
@@ -81,7 +108,11 @@ class Config:
             )
             self.__source_spec = self.source_spec_factory(source_specs)
 
-    def source_spec_factory(self, source_spec):
+    def source_spec_factory(self, source_spec: Union[Type, Iterable[Type]]) -> Type:
+        """
+        Creates a SourceSpec type.
+        Multiple sepecifications combined using class mro machinery.
+        """
         bases = tuple()
         if inspect.isclass(source_spec):
             bases += (source_spec,)
@@ -90,6 +121,12 @@ class Config:
         return type("SourceSpec", bases, {})
 
     def __get__item__attr__(self, name):
+        """
+        Retrieves configured parameters and converts to defined type.
+
+        Throws ParameterError when attempting to retieve a parameter
+        which is not defined on the ConfigSpec.
+        """
         parameters = self.__config_spec.__parameters__
         source_spec = self.__source_spec
         if name not in parameters:
@@ -104,11 +141,9 @@ class Config:
 
     def __getattr__(self, name):
         return self.__get__item__attr__(name)
-        # raise ParameterError(name)
 
     def __getitem__(self, name):
         return self.__get__item__attr__(name)
-        # raise ParameterError(name)
 
     def get(self, name):
         try:

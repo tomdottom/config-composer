@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 import time
 from typing import Optional
+from numbers import Number
 
 try:
     from dotenv import dotenv_values
@@ -17,11 +18,18 @@ FIFTEEN_SECONDS = 15
 
 
 class DotEnvFile(DocumentSource, DocumentSourceTTL, AbstractSourceDescriptor):
+    """Source from '.env' files.
+
+    :param path: to be read from the envfile
+    :param dotenv_path: filepath for the envfile
+    :param ttl: number of seconds between checking if the envfile has updated. Defaults to 15 seconds.
+    """
+
     def __init__(
         self,
         path: str,
         dotenv_path=".env",
-        ttl=FIFTEEN_SECONDS,
+        ttl: Number = FIFTEEN_SECONDS,
         _get_time=time.monotonic,
     ):
         if not _python_dotfile:

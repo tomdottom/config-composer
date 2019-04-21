@@ -1,3 +1,4 @@
+import logging
 import os
 import random
 import string
@@ -5,6 +6,9 @@ import string
 from moto import mock_ssm
 import boto3
 import pytest
+
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 @pytest.fixture
