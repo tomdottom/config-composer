@@ -1,0 +1,4 @@
+Quickstart
+==========
+
+.. literalinclude:: quickstart.py

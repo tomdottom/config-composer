@@ -8,6 +8,7 @@ name = "pypi"
 requests-mock = "*"
 pyyaml = "*"
 python-dotenv = "*"
+hvac = "*"
 
 [dev-packages]
 ipython = "*"
@@ -15,6 +16,10 @@ pytest = "*"
 black = "*"
 moto = "*"
 pre-commit = "*"
+sphinx = "*"
+sphinx-rtd-theme = "*"
+recommonmark = "*"
+sphinxcontrib-blockdiag = {ref = "1.5.5", git = "https://github.com/blockdiag/sphinxcontrib-blockdiag.git"}
 
 [requires]
 python_version = "3.7"
