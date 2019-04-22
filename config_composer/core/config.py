@@ -8,6 +8,7 @@ import os
 import yaml
 
 from ..sources.abc import AbstractSourceDescriptor
+from .utils import all_parameter_info
 
 
 SOURCES = dict(
@@ -82,6 +83,37 @@ def source_spec_from_file(filepath):
     return SourceSpec
 
 
+def get_name(obj):
+    if inspect.isclass(obj):
+        return obj.__name__
+    else:
+        return obj.__class__.__name__
+
+
+def format_parameter_table(parameters_info):
+    parameter_format = "{name:<10} | {type:<10} | {source}".format
+    source_format = "{name} - {args}".format
+    header = "\n".join(
+        [
+            "Config created",
+            parameter_format(name="Parameter", type="Type", source="Source"),
+            parameter_format(name="---------", type="----", source="------"),
+            "",
+        ]
+    )
+    info = "\n".join(
+        parameter_format(
+            name=info.name,
+            type=get_name(info.type),
+            source=source_format(
+                name=get_name(info.sources[-1].type), args=info.sources[-1].args
+            ),
+        )
+        for info in parameters_info
+    )
+    return header + info
+
+
 class Config:
     """Binds a ConfigSpec and SourceSpec into a config object.
 
@@ -107,6 +139,8 @@ class Config:
             )
             self.__source_spec = self.source_spec_factory(source_specs)
 
+        logger.info(format_parameter_table(all_parameter_info(self)))
+
     def source_spec_factory(self, source_spec: Union[Type, Iterable[Type]]) -> Type:
         """
         Creates a SourceSpec type.
@@ -118,6 +152,25 @@ class Config:
         elif source_spec and isinstance(source_spec, (Iterable,)):
             bases += tuple(source_spec)
         return type("SourceSpec", bases, {})
+
+    def _parameter_spec(self, name):
+        parameters = self.__config_spec.__parameters__
+        if name not in parameters:
+            raise ParameterError(name)
+        # if not hasattr(source_spec, name):
+        # Cannot use hasattr as it will invoke descriptors :facepalm:/
+        spec = parameters[name]
+        return spec
+
+    def _parameter_names(self):
+        return list(self.__config_spec.__parameters__.keys())
+
+    def _source_specs(self, name):
+        source_spec = self.__source_spec
+        sources = list(filter(None, [o.__dict__.get(name) for o in source_spec.mro()]))
+        if not any(sources):
+            raise ParameterError(name)
+        return sources
 
     def __get__item__attr__(self, name):
         """

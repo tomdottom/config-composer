@@ -17,5 +17,9 @@ class Default(ValueSource, AbstractSourceDescriptor):
         return (name,)
 
     @property
+    def _args(self):
+        return dict(value=self._value)
+
+    @property
     def _value(self):
         return self._default_value

@@ -36,6 +36,10 @@ class Parameter(ValueSource, AbstractSourceDescriptor):
         return (name,)
 
     @property
+    def _args(self):
+        return dict(path=self._path)
+
+    @property
     def _value(self):
         client = boto3.client("ssm")
         try:
