@@ -38,7 +38,7 @@ class ValueSource(ABC):
             setattr(cache_host, "__source_cache__", {})
         root_cache = getattr(cache_host, "__source_cache__")
         cache_key = self._key
-        if not cache_key in root_cache:
+        if cache_key not in root_cache:
             root_cache[cache_key] = {}
         return root_cache[cache_key]
 
@@ -71,7 +71,7 @@ class DocumentSource(ABC):
             setattr(cache_host, "__source_cache__", {})
         root_cache = getattr(cache_host, "__source_cache__")
         cache_key = self._key
-        if not cache_key in root_cache:
+        if cache_key not in root_cache:
             root_cache[cache_key] = {}
         return root_cache[cache_key]
 
@@ -87,6 +87,6 @@ class DocumentSourceTTL(ABC):
             setattr(ttl_host, "__source_ttl__", {})
         root_ttl = getattr(ttl_host, "__source_ttl__")
         ttl_key = self._key
-        if not ttl_key in root_ttl:
+        if ttl_key not in root_ttl:
             root_ttl[ttl_key] = {}
         return root_ttl[ttl_key]

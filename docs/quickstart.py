@@ -15,6 +15,7 @@ class SourceSpec:
     bar = aws.Parameter(path="/foo/bar/baz")
     baz = vault.Secret(path="/foo/bar/baz", field="my-secret")
     qux = files.DotEnvFile(path="FOO", dotenv_path="/app/config/.prod-env")
+    wat = Default(value="wat")
 
 
 config = Config(config_spec=ConfigSpec, source_spec=SourceSpec)

@@ -1,3 +1,3 @@
-from .default import Default
-from .env import Env
-from . import aws
+from .default import Default  # noqa
+from .env import Env  # noqa
+from . import aws  # noqa

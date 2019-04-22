@@ -42,7 +42,7 @@ class MetaSpec(type):
         value_parameter_specs = [
             ParameterSpec(name, get_factory_type(value))
             for name, value in values.items()
-            if (not name in declared_parameters and isinstance(value, (Parameter,)))
+            if (name not in declared_parameters and isinstance(value, (Parameter,)))
         ]
         return dict(
             (spec.name, spec)

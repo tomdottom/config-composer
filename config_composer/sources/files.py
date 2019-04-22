@@ -1,6 +1,5 @@
-from pathlib import Path
 from textwrap import dedent
-from typing import Optional, Union
+from typing import Union
 import os
 import time
 
@@ -11,7 +10,6 @@ try:
 except ImportError:
     _python_dotfile = True
 
-from ..consts import NOTHING
 from .abc import AbstractSourceDescriptor, DocumentSource, DocumentSourceTTL
 
 FIFTEEN_SECONDS = 15
@@ -64,14 +62,12 @@ class DotEnvFile(DocumentSource, DocumentSourceTTL, AbstractSourceDescriptor):
                 "last_modified_time": os.stat(self._dotenv_path).st_mtime,
                 "last_read": time,
             }
-
         elif (time - ttl_stamp["last_read"]) > self._ttl:
             expired = True
             ttl_stamp = {
                 "last_modified_time": os.stat(self._dotenv_path).st_mtime,
                 "last_read": time,
             }
-            modified_time = os.stat(self._dotenv_path).st_mtime
         else:
             expired = False
 

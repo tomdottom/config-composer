@@ -1,6 +1,4 @@
 from textwrap import dedent
-from typing import Optional
-import os
 
 try:
     import boto3
@@ -43,6 +41,6 @@ class Parameter(ValueSource, AbstractSourceDescriptor):
         try:
             response = client.get_parameter(Name=self._path, WithDecryption=True)
             value = response["Parameter"]["Value"]
-        except botocore.exceptions.ClientError as err:
+        except botocore.exceptions.ClientError:
             value = NOTHING
         return value

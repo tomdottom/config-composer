@@ -1,6 +1,4 @@
 from textwrap import dedent
-from typing import Optional
-import os
 
 try:
     import hvac
@@ -61,6 +59,6 @@ class Secret(ValueSource, AbstractSourceDescriptor):
             if "errors" in response:
                 return NOTHING
             value = response["data"]["data"].get(self._field, NOTHING)
-        except hvac.exceptions.InvalidPath as err:
+        except hvac.exceptions.InvalidPath:
             value = NOTHING
         return value

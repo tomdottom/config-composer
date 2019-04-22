@@ -1,5 +1,4 @@
 import logging
-import os
 import sys
 from pathlib import Path
 
@@ -9,7 +8,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 # Add repo root to path to make config_composer importable
 repo_root = str(Path(__file__).absolute().parent.parent.parent)
 sys.path.append(repo_root)
-from config_composer.core import Config, Spec
+from config_composer.core import Config, Spec  # noqa: E402s
 
 
 logging.basicConfig(level=logging.INFO)
@@ -26,7 +25,7 @@ config = Config(config_spec=ConfigSpec, env_var="SOURCE_SPEC_PATH")
 
 
 def mock_query_db():
-    password = config.db_pass
+    # password = config.db_pass
 
     return "Bob"
 

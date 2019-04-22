@@ -1,8 +1,4 @@
-from collections import namedtuple
-import os
-import sys
-
-from .config import Config, ParameterError
-from .spec import Spec
-from .parameter_types import String, Integer
-from ..consts import NOTHING
+from ..consts import NOTHING  # noqa
+from .config import Config, ParameterError  # noqa
+from .parameter_types import String, Integer  # noqa
+from .spec import Spec  # noqa

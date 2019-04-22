@@ -1,7 +1,5 @@
-from typing import Optional, Any
-import os
+from typing import Any
 
-from ..consts import NOTHING
 from .abc import AbstractSourceDescriptor, ValueSource
 
 

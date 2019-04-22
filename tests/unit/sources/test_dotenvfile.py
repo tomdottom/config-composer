@@ -1,8 +1,5 @@
-import os
 from textwrap import dedent
 from tempfile import NamedTemporaryFile
-
-import pytest
 
 from config_composer.sources.files import DotEnvFile
 

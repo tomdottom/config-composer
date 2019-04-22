@@ -2,7 +2,6 @@ from configparser import ConfigParser
 from pathlib import Path
 from typing import Iterable, Callable, Dict, Union, Type
 import inspect
-import inspect
 import logging
 import os
 

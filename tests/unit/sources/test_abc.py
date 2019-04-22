@@ -184,7 +184,7 @@ class TestDocumentSourceTTL:
                 if not isinstance(ttl_data, dict):
                     ttl_data = control
 
-                if ttl_data["expired"] == True:
+                if ttl_data["expired"] is True:
                     expired = True
                     ttl_data.update({"expired": False})
                 else:
@@ -243,7 +243,7 @@ class TestDocumentSourceTTL:
                 if not isinstance(ttl_data, dict):
                     ttl_data = control
 
-                if ttl_data["expired"] == True:
+                if ttl_data["expired"] is True:
                     expired = True
                     ttl_data.update({"expired": False})
                 else:
