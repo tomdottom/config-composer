@@ -26,10 +26,6 @@ class TestValueSource:
                 class_name = type(self).__name__
                 return (class_name,)
 
-            @property
-            def _args(self):
-                return dict()
-
             def __repr__(self):
                 return "MySource()"
 
@@ -54,10 +50,6 @@ class TestValueSource:
             def _key(self):
                 class_name = type(self).__name__
                 return (class_name,)
-
-            @property
-            def _args(self):
-                return dict(path=self._path)
 
             def __repr__(self):
                 return f"""MySource(path="{self._path}")"""
@@ -109,10 +101,6 @@ class TestDocumentSource:
                 class_name = type(self).__name__
                 return (class_name,)
 
-            @property
-            def _args(self):
-                return dict()
-
             def __repr__(self):
                 return f"""MySource()"""
 
@@ -137,10 +125,6 @@ class TestDocumentSource:
             def _key(self):
                 class_name = type(self).__name__
                 return (class_name,)
-
-            @property
-            def _args(self):
-                return dict(path=self._path)
 
             def __repr__(self):
                 return f"""MySource(path="{self._path}")"""
@@ -204,10 +188,6 @@ class TestDocumentSourceTTL:
                 class_name = type(self).__name__
                 return (class_name,)
 
-            @property
-            def _args(self):
-                return dict()
-
             def __repr__(self):
                 return f"""MySource()"""
 
@@ -264,10 +244,6 @@ class TestDocumentSourceTTL:
             def _key(self):
                 class_name = type(self).__name__
                 return (class_name,)
-
-            @property
-            def _args(self):
-                return dict(path=self._path)
 
             def __repr__(self):
                 return f"""MySource(path="{self._path}")"""

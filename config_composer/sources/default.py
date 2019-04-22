@@ -16,10 +16,6 @@ class Default(ValueSource, AbstractSourceDescriptor):
         name = type(self).__name__
         return (name,)
 
-    @property
-    def _args(self):
-        return dict(value=self._value)
-
     def __repr__(self):
         return f"""Default(value="{self._value}")"""
 
@@ -29,9 +25,5 @@ class Default(ValueSource, AbstractSourceDescriptor):
 
 
 class DefaultSecret(Default, AbstractSourceDescriptor):
-    @property
-    def _args(self):
-        return dict(value="*** redacted ***")
-
     def __repr__(self):
         return f"""DefaultSecret(value="*** redacted ***")"""

@@ -1,11 +1,13 @@
-from ..core_data_structures import SourceInfo, ParameterInfo
+from ..core_data_structures import ParameterInfo
 
 
 def parameter_info(config, name):
     parameter_spec = config._parameter_spec(name)
-    source_specs = [SourceInfo(type(s), s._args) for s in config._source_specs(name)]
+    sources = [repr(s) for s in config._source_specs(name)]
 
-    return ParameterInfo(parameter_spec.name, parameter_spec.type, source_specs)
+    return ParameterInfo(
+        name=parameter_spec.name, type=parameter_spec.type, sources=sources
+    )
 
 
 def all_parameter_info(config):

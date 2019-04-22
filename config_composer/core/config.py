@@ -92,7 +92,6 @@ def get_name(obj):
 
 def format_parameter_table(parameters_info):
     parameter_format = "{name:<10} | {type:<10} | {source}".format
-    source_format = "{name} - {args}".format
     header = "\n".join(
         [
             "Config created",
@@ -103,11 +102,7 @@ def format_parameter_table(parameters_info):
     )
     info = "\n".join(
         parameter_format(
-            name=info.name,
-            type=get_name(info.type),
-            source=source_format(
-                name=get_name(info.sources[-1].type), args=info.sources[-1].args
-            ),
+            name=info.name, type=get_name(info.type), source=info.sources[0]
         )
         for info in parameters_info
     )

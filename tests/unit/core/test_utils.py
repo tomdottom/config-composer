@@ -1,20 +1,13 @@
 import os
 
 from config_composer.core import Spec, Config
-from config_composer.core.utils import (
-    all_parameter_info,
-    parameter_info,
-    SourceInfo,
-    ParameterInfo,
-)
+from config_composer.core.utils import all_parameter_info, parameter_info, ParameterInfo
 from config_composer.sources.env import Env
 
 
 def test_get_parameter_info(random_string, random_integer):
     os.environ["VALUE"] = random_string
-    expected_parameter_info = ParameterInfo(
-        "foo", str, [SourceInfo(Env, dict(path="VALUE"))]
-    )
+    expected_parameter_info = ParameterInfo("foo", str, ["""Env(path="VALUE")"""])
 
     class ConfigSpec(Spec):
         foo: str
@@ -32,8 +25,8 @@ def test_get_all_parameters_info(random_string, random_integer):
     os.environ["VALUE"] = random_string
     os.environ["VALUE"] = random_string
     expected_parameter_info = [
-        ParameterInfo("foo", str, [SourceInfo(Env, dict(path="VALUE"))]),
-        ParameterInfo("bar", str, [SourceInfo(Env, dict(path="VALUE"))]),
+        ParameterInfo("foo", str, ["""Env(path="VALUE")"""]),
+        ParameterInfo("bar", str, ["""Env(path="VALUE")"""]),
     ]
 
     class ConfigSpec(Spec):

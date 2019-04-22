@@ -12,10 +12,6 @@ class AbstractSourceDescriptor(ABC):
     def _key(self):
         raise NotImplementedError
 
-    @abstractproperty
-    def _args(self):
-        raise NotImplementedError
-
     @abstractmethod
     def __repr__(self):
         raise NotImplementedError

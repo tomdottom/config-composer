@@ -54,10 +54,6 @@ class DotEnvFile(DocumentSource, DocumentSourceTTL, AbstractSourceDescriptor):
         source_name = type(self).__name__
         return source_name, self._dotenv_path
 
-    @property
-    def _args(self):
-        return dict(dotenv_path=self._dotenv_path, path=self._path, ttl=self._ttl)
-
     def __repr__(self):
         return f"""DotEnvFile(path="{self._path}", dotenv_path="{self._dotenv_path}, ttl="{self._ttl}")"""
 
