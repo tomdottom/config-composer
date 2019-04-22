@@ -23,3 +23,9 @@ class Default(ValueSource, AbstractSourceDescriptor):
     @property
     def _value(self):
         return self._default_value
+
+
+class DefaultSecret(Default, AbstractSourceDescriptor):
+    @property
+    def _args(self):
+        return dict(value="*** redacted ***")
