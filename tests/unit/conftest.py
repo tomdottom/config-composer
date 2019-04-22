@@ -72,3 +72,32 @@ def vault_secret_fixtures(requests_mock, random_string):
     requests_mock.get(url=missing_secret_uri, json={"errors": []})
 
     yield random_string
+
+
+@pytest.fixture
+def environ():
+    class Environ:
+        def __init__(self):
+            self._og_keys = set(os.environ.keys())
+            self._keys = set()
+
+        def __getitem__(self, name):
+            return os.environ[name]
+
+        def __setitem__(self, name, value):
+            self._keys.add(name)
+            os.environ[name] = value
+
+        def __delitem__(self, name):
+            self._keys.remove(name)
+            del os.environ[name]
+
+        def clean_up(self):
+            for key in self._keys - self._og_keys:
+                del os.environ[key]
+
+    environ = Environ()
+
+    yield Environ()
+
+    environ.clean_up()

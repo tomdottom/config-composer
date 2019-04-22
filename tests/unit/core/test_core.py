@@ -1,6 +1,5 @@
 from textwrap import dedent
 from tempfile import NamedTemporaryFile
-import os
 
 import pytest
 
@@ -11,8 +10,8 @@ from config_composer.sources.env import Env
 
 
 # Test loading source spec from files
-def test_source_spec_from_yaml_file(random_string):
-    os.environ["VALUE"] = str(random_string)
+def test_source_spec_from_yaml_file(environ, random_string):
+    environ["VALUE"] = str(random_string)
 
     tempfile = NamedTemporaryFile(suffix=".yaml")
     with open(tempfile.name, "w") as fh:
@@ -26,7 +25,7 @@ def test_source_spec_from_yaml_file(random_string):
         """
             )
         )
-    os.environ["SOURCE_SPEC_PATH"] = tempfile.name
+    environ["SOURCE_SPEC_PATH"] = tempfile.name
 
     class ConfigSpec(Spec):
         foo: str
@@ -36,8 +35,8 @@ def test_source_spec_from_yaml_file(random_string):
     assert config.foo == random_string
 
 
-def test_source_spec_from_ini_file(random_string):
-    os.environ["VALUE"] = str(random_string)
+def test_source_spec_from_ini_file(environ, random_string):
+    environ["VALUE"] = str(random_string)
 
     tempfile = NamedTemporaryFile(suffix=".ini")
     with open(tempfile.name, "w") as fh:
@@ -50,7 +49,7 @@ def test_source_spec_from_ini_file(random_string):
         """
             )
         )
-    os.environ["SOURCE_SPEC_PATH"] = tempfile.name
+    environ["SOURCE_SPEC_PATH"] = tempfile.name
 
     class ConfigSpec(Spec):
         foo: str
@@ -61,8 +60,8 @@ def test_source_spec_from_ini_file(random_string):
 
 
 # Test composing multiple source specs
-def test_multiple_source_specs(random_string, random_integer):
-    os.environ["VALUE"] = random_string
+def test_multiple_source_specs(environ, random_string, random_integer):
+    environ["VALUE"] = random_string
 
     class ConfigSpec(Spec):
         foo: str
@@ -80,8 +79,10 @@ def test_multiple_source_specs(random_string, random_integer):
     assert config.bar == random_integer
 
 
-def test_multiple_source_specs_most_significant_spec(random_string, random_integer):
-    os.environ["VALUE"] = random_string
+def test_multiple_source_specs_most_significant_spec(
+    environ, random_string, random_integer
+):
+    environ["VALUE"] = random_string
 
     class ConfigSpec(Spec):
         foo: str
@@ -101,8 +102,8 @@ def test_multiple_source_specs_most_significant_spec(random_string, random_integ
     assert config.bar == str(random_integer)
 
 
-def test_source_spec_from_multiple_ini_file(random_string, random_integer):
-    os.environ["VALUE"] = str(random_string)
+def test_source_spec_from_multiple_ini_file(environ, random_string, random_integer):
+    environ["VALUE"] = str(random_string)
 
     deploy_spec = NamedTemporaryFile(suffix=".ini")
     default_spec = NamedTemporaryFile(suffix=".ini")
@@ -132,7 +133,7 @@ def test_source_spec_from_multiple_ini_file(random_string, random_integer):
         )
 
     # deploy_spec shadows default_spec
-    os.environ["SOURCE_SPEC_PATH"] = ",".join((deploy_spec.name, default_spec.name))
+    environ["SOURCE_SPEC_PATH"] = ",".join((deploy_spec.name, default_spec.name))
 
     class ConfigSpec(Spec):
         foo: str
@@ -165,8 +166,8 @@ def test_accessing_non_existant_config_parameter(random_integer):
 
 
 # Test parameter types and casting of values
-def test_casts_source_value_to_type(random_integer):
-    os.environ["VALUE"] = str(random_integer)
+def test_casts_source_value_to_type(environ, random_integer):
+    environ["VALUE"] = str(random_integer)
 
     class ConfigSpec(Spec):
         foo: str
@@ -191,9 +192,9 @@ def test_casts_source_value_to_type(random_integer):
     assert config.bar == random_integer
 
 
-def test_string_parameter_type(random_string):
-    os.environ["FOO"] = random_string
-    os.environ["BAR"] = random_string
+def test_string_parameter_type(environ, random_string):
+    environ["FOO"] = random_string
+    environ["BAR"] = random_string
 
     class ConfigSpec(Spec):
         foo: str
@@ -208,9 +209,9 @@ def test_string_parameter_type(random_string):
     assert config.bar == random_string
 
 
-def test_integer_parameter_type(random_integer):
-    os.environ["FOO"] = str(random_integer)
-    os.environ["BAR"] = str(random_integer)
+def test_integer_parameter_type(environ, random_integer):
+    environ["FOO"] = str(random_integer)
+    environ["BAR"] = str(random_integer)
 
     class ConfigSpec(Spec):
         foo: int
@@ -226,7 +227,7 @@ def test_integer_parameter_type(random_integer):
 
 
 # Test parameter sources
-def test_default(random_string):
+def test_default(environ, random_string):
     class ConfigSpec(Spec):
         foo: str
 
@@ -239,8 +240,8 @@ def test_default(random_string):
     assert config.foo == random_string
 
 
-def test_env(random_string):
-    os.environ["BAR"] = random_string
+def test_env(environ, random_string):
+    environ["BAR"] = random_string
 
     class ConfigSpec(Spec):
         foo: str
