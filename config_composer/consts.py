@@ -2,4 +2,4 @@ class NOTHING:
     pass
 
 
-NOTHING = NOTHING()
+NOTHING: object = NOTHING()  # type: ignore

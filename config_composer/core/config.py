@@ -113,7 +113,7 @@ class Config:
         Creates a SourceSpec type.
         Multiple sepecifications combined using class mro machinery.
         """
-        bases = tuple()
+        bases: tuple = tuple()
         if inspect.isclass(source_spec):
             bases += (source_spec,)
         elif source_spec and isinstance(source_spec, (Iterable,)):

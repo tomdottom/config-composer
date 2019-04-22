@@ -20,6 +20,7 @@ sphinx = "*"
 sphinx-rtd-theme = "*"
 recommonmark = "*"
 sphinxcontrib-blockdiag = {ref = "1.5.5", git = "https://github.com/blockdiag/sphinxcontrib-blockdiag.git"}
+mypy = "*"
 
 [requires]
 python_version = "3.7"

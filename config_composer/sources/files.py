@@ -1,8 +1,8 @@
-import os
 from pathlib import Path
+from textwrap import dedent
+from typing import Optional, Union
+import os
 import time
-from typing import Optional
-from numbers import Number
 
 try:
     from dotenv import dotenv_values
@@ -29,7 +29,7 @@ class DotEnvFile(DocumentSource, DocumentSourceTTL, AbstractSourceDescriptor):
         self,
         path: str,
         dotenv_path=".env",
-        ttl: Number = FIFTEEN_SECONDS,
+        ttl: Union[int, float] = FIFTEEN_SECONDS,
         _get_time=time.monotonic,
     ):
         if not _python_dotfile:
