@@ -39,6 +39,9 @@ class Parameter(ValueSource, AbstractSourceDescriptor):
     def _args(self):
         return dict(path=self._path)
 
+    def __repr__(self):
+        return f"""aws.Parameter(path="{self._path}")"""
+
     @property
     def _value(self):
         client = boto3.client("ssm")

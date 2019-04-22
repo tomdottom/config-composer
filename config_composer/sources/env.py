@@ -25,6 +25,9 @@ class Env(ValueSource, AbstractSourceDescriptor):
     def _args(self):
         return dict(path=self._path)
 
+    def __repr__(self):
+        return f"""Env(path="{self._path}")"""
+
     @property
     def _value(self):
         return os.environ.get(self._path, NOTHING)

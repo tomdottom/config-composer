@@ -30,6 +30,9 @@ class TestValueSource:
             def _args(self):
                 return dict()
 
+            def __repr__(self):
+                return "MySource()"
+
             @property
             def _value(self):
                 return random_string
@@ -55,6 +58,9 @@ class TestValueSource:
             @property
             def _args(self):
                 return dict(path=self._path)
+
+            def __repr__(self):
+                return f"""MySource(path="{self._path}")"""
 
             @property
             def _value(self):
@@ -107,6 +113,9 @@ class TestDocumentSource:
             def _args(self):
                 return dict()
 
+            def __repr__(self):
+                return f"""MySource()"""
+
             @property
             def _doc(self):
                 return {"foo": random_string}
@@ -132,6 +141,9 @@ class TestDocumentSource:
             @property
             def _args(self):
                 return dict(path=self._path)
+
+            def __repr__(self):
+                return f"""MySource(path="{self._path}")"""
 
             @property
             def _doc(self):
@@ -196,6 +208,9 @@ class TestDocumentSourceTTL:
             def _args(self):
                 return dict()
 
+            def __repr__(self):
+                return f"""MySource()"""
+
             @property
             def _doc(self):
                 return {"foo": self._value}
@@ -253,6 +268,9 @@ class TestDocumentSourceTTL:
             @property
             def _args(self):
                 return dict(path=self._path)
+
+            def __repr__(self):
+                return f"""MySource(path="{self._path}")"""
 
             @property
             def _doc(self):

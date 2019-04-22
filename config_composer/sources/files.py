@@ -58,6 +58,9 @@ class DotEnvFile(DocumentSource, DocumentSourceTTL, AbstractSourceDescriptor):
     def _args(self):
         return dict(dotenv_path=self._dotenv_path, path=self._path, ttl=self._ttl)
 
+    def __repr__(self):
+        return f"""DotEnvFile(path="{self._path}", dotenv_path="{self._dotenv_path}, ttl="{self._ttl}")"""
+
     def _expired(self, ttl_stamp):
         time = self._get_time()
         if not isinstance(ttl_stamp, dict):

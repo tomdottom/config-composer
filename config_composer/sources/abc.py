@@ -17,6 +17,10 @@ class AbstractSourceDescriptor(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def __repr__(self):
+        raise NotImplementedError
+
+    @abstractmethod
     def __get__(self, obj, objtype):
         raise NotImplementedError
 

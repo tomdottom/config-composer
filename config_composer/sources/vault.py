@@ -52,6 +52,9 @@ class Secret(ValueSource, AbstractSourceDescriptor):
             field=self._field,
         )
 
+    def __repr__(self):
+        return f"""vault.Secret(path="{self._path}", field="{self._field}", mount_point="{self._mount_point}", server="{self._server}")"""
+
     @property
     def _value(self):
         client = hvac.Client(url=self._server)
