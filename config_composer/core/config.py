@@ -7,6 +7,7 @@ import os
 
 import yaml
 
+from ..consts import NOTHING
 from ..sources.abc import AbstractSourceDescriptor
 from .utils import all_parameter_info
 
@@ -184,6 +185,11 @@ class Config:
             raise ParameterError(name)
         spec = parameters[name]
         source_value = getattr(source_spec, name)
+        # If a source returns NOTHING it's an indicator that something happened
+        # and it couldn't retrieve a value.
+        # In this case we return NOTHING to the user
+        if source_value is NOTHING:
+            return source_value
         return spec.type(source_value)
 
     def __getattr__(self, name):

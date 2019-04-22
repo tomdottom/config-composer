@@ -4,6 +4,7 @@ from tempfile import NamedTemporaryFile
 import pytest
 
 from config_composer.core import Spec, Config, String, Integer, ParameterError
+from config_composer.core.utils import preload
 from config_composer.sources import aws, vault, files
 from config_composer.sources.default import Default
 from config_composer.sources.env import Env
@@ -304,3 +305,62 @@ def test_dotfile(random_string, random_integer):
 
     assert config.foo == random_string
     assert config.bar == random_integer
+
+
+# test behaviour on source failures at initialisation and at runtime
+def test_preloading_config(environ):
+    """If all sources are ok preloading is successful."""
+    environ["FOO"] = "123"
+
+    class ConfigSpec(Spec):
+        foo: str
+        bar: str
+
+    class SourceSpec:
+        foo = Default(value="FOO")
+        bar = Env(path="FOO")
+
+    config = Config(config_spec=ConfigSpec, source_spec=SourceSpec)
+
+    preload(config)
+
+
+def test_failed_preloading(environ):
+    """When a source fails at initialisation an error should be thrown."""
+    try:
+        del environ["FOO"]
+    except KeyError:
+        pass
+
+    class ConfigSpec(Spec):
+        foo: str
+        bar: str
+
+    class SourceSpec:
+        foo = Default(value="FOO")
+        bar = Env(path="FOO")
+
+    config = Config(config_spec=ConfigSpec, source_spec=SourceSpec)
+
+    with pytest.raises(Exception):
+        preload(config)
+
+
+def test_failed_runtime(environ):
+    """When a source fails at runtime the last fetched value should be kept."""
+    environ["FOO"] = "FOO"
+
+    class ConfigSpec(Spec):
+        foo: str
+
+    class SourceSpec:
+        foo = Env(path="FOO")
+
+    config = Config(config_spec=ConfigSpec, source_spec=SourceSpec)
+
+    preload(config)
+    assert config.foo == "FOO"
+
+    del environ["FOO"]
+
+    assert config.foo == "FOO"

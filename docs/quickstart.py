@@ -1,4 +1,5 @@
 from config_composer.core import Spec, Config
+from config_composer.core.utils import preload
 from config_composer.sources.env import Env
 from config_composer.sources import aws, vault, files
 from config_composer.sources.default import Default
@@ -20,7 +21,9 @@ class SourceSpec:
 
 config = Config(config_spec=ConfigSpec, source_spec=SourceSpec)
 
+if __name__ == "__main__":
+    preload(config)
 
-env_foo = config.foo
-bar_foo = config["bar"]
-env_baz = config.get("baz")
+    env_foo = config.foo
+    bar_foo = config["bar"]
+    env_baz = config.get("baz")

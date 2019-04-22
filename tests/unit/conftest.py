@@ -89,7 +89,7 @@ def environ():
             os.environ[name] = value
 
         def __delitem__(self, name):
-            self._keys.remove(name)
+            self._keys.discard(name)
             del os.environ[name]
 
         def clean_up(self):
