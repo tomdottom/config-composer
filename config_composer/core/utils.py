@@ -1,8 +1,4 @@
-from collections import namedtuple
-
-
-SourceInfo = namedtuple("SourceInfo", ["type", "args"])
-ParameterInfo = namedtuple("ParameterInfo", ["name", "type", "sources"])
+from ..core_data_structures import SourceInfo, ParameterInfo
 
 
 def parameter_info(config, name):

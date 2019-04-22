@@ -1,9 +1,5 @@
-from collections import namedtuple
-
 from .parameter_types import Parameter
-
-
-ParameterSpec = namedtuple("ParameterSpec", ["name", "type"])
+from ..core_data_structures import ParameterSpec
 
 
 def dunder_key(name):
