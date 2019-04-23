@@ -198,8 +198,12 @@ class Config:
     def __getitem__(self, name):
         return self.__get__item__attr__(name)
 
-    def get(self, name):
+    def get(self, name, default=None):
         try:
-            return self.__get__item__attr__(name)
+            value = self.__get__item__attr__(name)
         except ParameterError:
-            return None
+            value = default
+        finally:
+            if value is NOTHING:
+                return default
+        return value
