@@ -9,6 +9,7 @@ requests-mock = "*"
 pyyaml = "*"
 python-dotenv = "*"
 hvac = "*"
+transitions = "*"
 
 [dev-packages]
 ipython = "*"
@@ -19,9 +20,10 @@ pre-commit = "*"
 sphinx = "*"
 sphinx-rtd-theme = "*"
 recommonmark = "*"
-sphinxcontrib-blockdiag = {ref = "1.5.5", git = "https://github.com/blockdiag/sphinxcontrib-blockdiag.git"}
+sphinxcontrib-blockdiag = {ref = "1.5.5",git = "https://github.com/blockdiag/sphinxcontrib-blockdiag.git"}
 mypy = "*"
 "flake8" = ">=3.6"
+invoke = "*"
 
 [requires]
 python_version = "3.7"
@@ -31,3 +33,4 @@ allow_prereleases = true
 
 [scripts]
 tests = "pytest ./tests/"
+gen-state-machine-diagrams = "invoke gen-state-machine-diagrams"

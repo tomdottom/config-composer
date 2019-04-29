@@ -26,6 +26,7 @@ Quick Example
    :caption: Contents:
 
    quickstart
+   source-types
    api
 
 

@@ -1,0 +1,61 @@
+---
+states:
+  - "UNINITIALIZED"
+  - "INITIAL_FETCH"
+  - "SOURCE_ERROR"
+  - "VALUE_CACHED_SOURCE_OK"
+  - "FETCHING"
+  - "VALUE_CACHED_SOURCE_ERROR"
+
+initial: "UNINITIALIZED"
+
+transitions:
+  # UNINITIALIZED transitions
+  - trigger: '_fetch'
+    source: 'UNINITIALIZED'
+    dest: "INITIAL_FETCH"
+    after:
+      - "fetch"
+      - "_complete"
+  # INITIAL_FETCH transitions
+  - trigger: '_complete'
+    source: 'INITIAL_FETCH'
+    dest: "VALUE_CACHED_SOURCE_OK"
+    conditions:
+      - "ok"
+  - trigger: '_complete'
+    source: 'INITIAL_FETCH'
+    dest: "SOURCE_ERROR"
+    unless:
+      - "ok"
+  # SOURCE_ERROR transitions
+  - trigger: '_fetch'
+    source: "SOURCE_ERROR"
+    dest: "INITIAL_FETCH"
+    after:
+      - "fetch"
+      - "_complete"
+  # VALUE_CACHED_SOURCE_OK transitions
+  - trigger: '_fetch'
+    source:
+      - "VALUE_CACHED_SOURCE_OK"
+      - "VALUE_CACHED_SOURCE_ERROR"
+    dest: "FETCHING"
+    conditions:
+      - "expired"
+    after:
+      - "fetch"
+      - "_complete"
+  # FETCHING transitions
+  - trigger: '_complete'
+    source: "FETCHING"
+    dest: "VALUE_CACHED_SOURCE_OK"
+    conditions:
+      - "ok"
+  - trigger: '_complete'
+    source: "FETCHING"
+    dest: "VALUE_CACHED_SOURCE_ERROR"
+    unless:
+      - "ok"
+
+auto_transitions: False
