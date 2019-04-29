@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, List
+from typing import Any, List, Optional
 import os
 
 from config_composer.consts import NOTHING
@@ -14,27 +14,48 @@ from config_composer.sources.machines import (
 class SourceResult:
     data: Any
     errors: List
-    state: str
+    state: Optional[str]
+
+
+class AbstractBasicSource(ABC):
+    state = None
+
+    @abstractmethod
+    def fetch(self, cache):
+        raise NotImplementedError()
+
+    def data(self, cache) -> SourceResult:
+        return SourceResult(
+            data=cache["data"], errors=cache["errors"], state=self.state
+        )
+
+    def ok(self, cache) -> bool:
+        return not bool(cache["errors"])
+
+
+class AbstractExpirableBasicSource(ABC):
+    state = None
+
+    @abstractmethod
+    def fetch(self, cache):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def expired(self, cache):
+        raise NotImplementedError()
+
+    def data(self, cache) -> SourceResult:
+        return SourceResult(
+            data=cache["data"], errors=cache["errors"], state=self.state
+        )
+
+    def ok(self, cache) -> bool:
+        return not bool(cache["errors"])
 
 
 class TestBasicSource:
     def test_foo(self, environ):
         environ["FOO"] = "foo"
-
-        class AbstractBasicSource(ABC):
-            state = None
-
-            @abstractmethod
-            def fetch(self, cache):
-                pass
-
-            def data(self, cache) -> SourceResult:
-                return SourceResult(
-                    data=cache["data"], errors=cache["errors"], state=self.state
-                )
-
-            def ok(self, cache) -> bool:
-                return not bool(cache["errors"])
 
         class MyEnvSource(AbstractBasicSource):
             def fetch(self, cache):
@@ -79,25 +100,6 @@ class TestBasicSource:
 class TestExpirableBasicSource:
     def test_foo(self, environ):
         environ["FOO"] = "foo"
-
-        class AbstractExpirableBasicSource(ABC):
-            state = None
-
-            @abstractmethod
-            def fetch(self, cache):
-                pass
-
-            @abstractmethod
-            def expired(self, cache):
-                pass
-
-            def data(self, cache) -> SourceResult:
-                return SourceResult(
-                    data=cache["data"], errors=cache["errors"], state=self.state
-                )
-
-            def ok(self, cache) -> bool:
-                return not bool(cache["errors"])
 
         control = {"expired": False}
 
