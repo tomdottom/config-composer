@@ -19,7 +19,27 @@ class MyEnvSource(AbstractBasicSource):
 
     def fetch(self, cache):
         try:
-            cache.update({"data": os.environ[self._name]})
+            cache.update({"data": os.environ[self._name], "errors": []})
+        except KeyError as err:
+            cache.update({"errors": [repr(err)]})
+
+
+class MyExpirableEnvSource(AbstractExpirableBasicSource):
+    def __init__(self, name):
+        self._name = name
+        self._expired = False
+
+    def expire_me(self):
+        self._expired = True
+
+    def expired(self, cache):
+        _expired = self._expired
+        self._expired = False
+        return _expired
+
+    def fetch(self, cache):
+        try:
+            cache.update({"data": os.environ[self._name], "errors": []})
         except KeyError as err:
             cache.update({"errors": [repr(err)]})
 
@@ -82,70 +102,112 @@ class TestBasicSource:
 
 
 class TestExpirableBasicSource:
-    def test_foo(self, environ):
-        environ["FOO"] = "foo"
-
-        control = {"expired": False}
-
-        class MyEnvSource(AbstractExpirableBasicSource):
-            def expired(self, cache):
-                _expired = control["expired"]
-                control["expired"] = False
-                return _expired
-
-            def fetch(self, cache):
-                try:
-                    cache.update({"data": os.environ["FOO"], "errors": []})
-                except KeyError as err:
-                    cache.update({"errors": [repr(err)]})
-
-        source = MyEnvSource()
+    def test_fetches_value_from_source(self, environ, random_string):
+        source = MyExpirableEnvSource("FOO")
         ExpirableBasicSourceMachine(source)
 
         cache = {"data": NOTHING, "errors": []}
+
+        environ["FOO"] = random_string
+        source.trigger("_fetch", cache=cache)
         assert source.data(cache=cache) == SourceResult(
-            data=NOTHING, errors=[], state="UNINITIALIZED"
+            data=random_string, errors=[], state="VALUE_CACHED_SOURCE_OK"
         )
 
-        for _ in range(10):
+    def test_returns_cached_value(self, environ, random_string):
+        source = MyExpirableEnvSource("FOO")
+        ExpirableBasicSourceMachine(source)
+
+        environ["FOO"] = random_string
+        cache = {"data": NOTHING, "errors": []}
+        source.trigger("_fetch", cache=cache)
+        environ["FOO"] = "BAR"
+        source.trigger("_fetch", cache=cache)
+
+        assert source.data(cache=cache) == SourceResult(
+            data=random_string, errors=[], state="VALUE_CACHED_SOURCE_OK"
+        )
+
+    def test_only_fetches_once(self, environ):
+        source = mock.Mock(wraps=MyExpirableEnvSource("FOO"))
+        ExpirableBasicSourceMachine(source)
+
+        cache = {"data": NOTHING, "errors": []}
+
+        environ["FOO"] = "foo"
+
+        # source data 10 times
+        # expire twice
+        for i in range(10):
             source.trigger("_fetch", cache=cache)
+            if i in [4, 8]:
+                source.expire_me()
 
-        assert isinstance(source.data(cache=cache), SourceResult)
+        # expired not called on initial fetch
+        assert source.expired.call_count == 9
+        # 1 initial fetch + 2 expired
+        assert source.fetch.call_count == 3
 
-        assert source.data(cache=cache) == SourceResult(
-            data="foo", errors=[], state="VALUE_CACHED_SOURCE_OK"
-        )
+    def test_fetches_new_value_when_cached_expired(
+        self, environ, random_string, random_integer
+    ):
+        source = MyExpirableEnvSource("FOO")
+        ExpirableBasicSourceMachine(source)
 
-        environ["FOO"] = "bar"
+        cache = {"data": NOTHING, "errors": []}
 
-        assert source.data(cache=cache) == SourceResult(
-            data="foo", errors=[], state="VALUE_CACHED_SOURCE_OK"
-        )
+        # Get value and cache
+        environ["FOO"] = random_string
+        source.trigger("_fetch", cache=cache)
 
-        control["expired"] = True
-
+        # Expire and get new value
+        source.expire_me()
+        environ["FOO"] = str(random_integer)
         source.trigger("_fetch", cache=cache)
 
         assert source.data(cache=cache) == SourceResult(
-            data="bar", errors=[], state="VALUE_CACHED_SOURCE_OK"
+            data=str(random_integer), errors=[], state="VALUE_CACHED_SOURCE_OK"
         )
 
+    def test_returns_cached_value_on_error(self, environ, random_string):
+        source = MyExpirableEnvSource("FOO")
+        ExpirableBasicSourceMachine(source)
+
+        cache = {"data": NOTHING, "errors": []}
+
+        # Get value and cache
+        environ["FOO"] = random_string
+        source.trigger("_fetch", cache=cache)
+        # Expire and Error when getting value from source
+        source.expire_me()
         del environ["FOO"]
-
-        assert source.data(cache=cache) == SourceResult(
-            data="bar", errors=[], state="VALUE_CACHED_SOURCE_OK"
-        )
-
         source.trigger("_fetch", cache=cache)
 
         assert source.data(cache=cache) == SourceResult(
-            data="bar", errors=[], state="VALUE_CACHED_SOURCE_OK"
+            data=random_string,
+            errors=["KeyError('FOO')"],
+            state="VALUE_CACHED_SOURCE_ERROR",
         )
 
-        control["expired"] = True
+    def test_recovers_from_error(self, environ, random_string):
 
+        source = MyExpirableEnvSource("FOO")
+        ExpirableBasicSourceMachine(source)
+
+        cache = {"data": NOTHING, "errors": []}
+
+        # Get value and cache
+        environ["FOO"] = "FOO"
+        source.trigger("_fetch", cache=cache)
+        # Expire and Error when getting value from source
+        source.expire_me()
+        del environ["FOO"]
+        source.trigger("_fetch", cache=cache)
+        # Succeed in getting from source next time round
+        source.expire_me()
+        environ["FOO"] = random_string
         source.trigger("_fetch", cache=cache)
 
         assert source.data(cache=cache) == SourceResult(
-            data="bar", errors=["KeyError('FOO')"], state="VALUE_CACHED_SOURCE_ERROR"
+            data=random_string, errors=[], state="VALUE_CACHED_SOURCE_OK"
         )
