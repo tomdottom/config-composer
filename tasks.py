@@ -9,11 +9,15 @@ def gen_state_machine_diagrams(ctx):
     )
     from transitions.extensions import GraphMachine
 
-    class BasicSourceGraphMachine(GraphMachine, BasicSourceMachine):
-        pass
+    class BasicSourceGraphMachine(BasicSourceMachine, GraphMachine):
+        def __init__(self, *args, **kwargs):
+            self.__machine_args__["show_conditions"] = True
+            return super().__init__(*args, **kwargs)
 
-    class ExpirableBasicSourceMachine(GraphMachine, ExpirableBasicSourceMachine):
-        pass
+    class ExpirableBasicSourceMachine(ExpirableBasicSourceMachine, GraphMachine):
+        def __init__(self, *args, **kwargs):
+            self.__machine_args__["show_conditions"] = True
+            return super().__init__(*args, **kwargs)
 
     class Foo:
         pass
