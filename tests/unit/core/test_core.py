@@ -4,10 +4,11 @@ from tempfile import NamedTemporaryFile
 import pytest
 
 from config_composer.core import Spec, Config, String, Integer, ParameterError
+from config_composer.core.spec import SourceSpec
 from config_composer.core.utils import preload
 from config_composer.sources import aws, vault, files
 from config_composer.sources.default import Default
-from config_composer.sources.env import Env
+from config_composer.sources.env import Env, Env2
 
 
 # Test loading source spec from files
@@ -251,6 +252,21 @@ def test_env(environ, random_string):
         foo = Env(path="BAR")
 
     config = Config(config_spec=ConfigSpec, source_spec=SourceSpec)
+
+    assert config["foo"] == random_string
+    assert config.foo == random_string
+
+
+def test_env2(environ, random_string):
+    environ["BAR"] = random_string
+
+    class ConfigSpec(Spec):
+        foo: str
+
+    class SSpec(SourceSpec):
+        foo = Env2(path="BAR")
+
+    config = Config(config_spec=ConfigSpec, source_spec=SSpec)
 
     assert config["foo"] == random_string
     assert config.foo == random_string

@@ -17,6 +17,13 @@ class MyEnvSource(AbstractBasicSource):
     def __init__(self, name):
         self._name = name
 
+    def key(self):
+        name = type(self).__name__
+        return (name,)
+
+    def get(self, name, cache):
+        return cache["data"]
+
     def fetch(self, cache):
         try:
             cache.update({"data": os.environ[self._name], "errors": []})
@@ -99,6 +106,18 @@ class TestBasicSource:
         assert source.data(cache=cache) == SourceResult(
             data=NOTHING, errors=["KeyError('FOO')"], state="SOURCE_ERROR"
         )
+
+    def test_get_value(self, environ, random_string):
+        environ["FOO"] = random_string
+
+        source = MyEnvSource("FOO")
+        BasicSourceMachine(source)
+
+        cache = {"data": NOTHING, "errors": []}
+
+        source.trigger("_fetch", cache=cache)
+
+        assert source.get("FOO", cache)
 
 
 class TestExpirableBasicSource:

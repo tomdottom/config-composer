@@ -4,11 +4,13 @@ from typing import Iterable, Callable, Dict, Union, Type
 import inspect
 import logging
 import os
+from collections import defaultdict
 
 import yaml
 
 from ..consts import NOTHING
 from ..sources.abc import AbstractSourceDescriptor
+from ..sources.abc2 import AbstractBasicSource
 from .utils import all_parameter_info
 
 
@@ -135,6 +137,8 @@ class Config:
             )
             self.__source_spec = self.source_spec_factory(source_specs)
 
+        self.__cache__ = defaultdict(dict)
+
         logger.info(format_parameter_table(all_parameter_info(self)))
 
     def source_spec_factory(self, source_spec: Union[Type, Iterable[Type]]) -> Type:
@@ -188,6 +192,11 @@ class Config:
         # If a source returns NOTHING it's an indicator that something happened
         # and it couldn't retrieve a value.
         # In this case we return NOTHING to the user
+        if isinstance(source_value, AbstractBasicSource):
+            cache = self.__cache__[source_value.key]
+            source_value._fetch(cache=cache)
+            source_value = source_value.get(name, cache)
+
         if source_value is NOTHING:
             return source_value
         return spec.type(source_value)

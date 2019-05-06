@@ -1,5 +1,7 @@
 from .parameter_types import Parameter
 from ..core_data_structures import ParameterSpec
+from ..sources.machines import BasicSourceMachine
+from ..sources.abc2 import AbstractBasicSource
 
 
 def dunder_key(name):
@@ -47,4 +49,23 @@ class MetaSpec(type):
 
 
 class Spec(metaclass=MetaSpec):
+    pass
+
+
+class MetaSourceSpec(type):
+    def __new__(mcls, name, bases, attrs):
+        for name, source in attrs.items():
+            if not name.startswith("__"):
+                mcls.apply_state_machine(source)
+
+        klass = super().__new__(mcls, name, bases, attrs)
+        return klass
+
+    @staticmethod
+    def apply_state_machine(source):
+        if isinstance(source, AbstractBasicSource):
+            BasicSourceMachine(source)
+
+
+class SourceSpec(metaclass=MetaSourceSpec):
     pass

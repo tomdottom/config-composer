@@ -14,6 +14,14 @@ class AbstractBasicSource(ABC):
     state = None
 
     @abstractmethod
+    def key(self):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def get(self, name, cache):
+        raise NotImplementedError()
+
+    @abstractmethod
     def fetch(self, cache):
         raise NotImplementedError()
 
